@@ -53,9 +53,11 @@
       "properties": {
         "userId": { "type": "string" },
         "text": { "type": "string" },
-        "date": { "type": "string" }
+        "date": { "type": "string" },
+        "color": { "type": "string" },
+        "rotation": { "type": "string" }
       },
-      "required": ["userId", "text", "date"]
+      "required": ["userId", "text", "date", "color", "rotation"]
     }
   },
   "firestore": {

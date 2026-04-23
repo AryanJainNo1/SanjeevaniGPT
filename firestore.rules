@@ -59,11 +59,13 @@ service cloud.firestore {
 
     // Validation Blueprint: GratitudeEntry
     function isValidGratitudeEntry(data, userId) {
-      return data.keys().hasAll(['userId', 'text', 'date']) &&
-             data.keys().size() == 3 &&
+      return data.keys().hasAll(['userId', 'text', 'date', 'color', 'rotation']) &&
+             data.keys().size() == 5 &&
              data.userId == userId &&
              data.text is string && data.text.size() <= 1000 &&
-             data.date is string;
+             data.date is string &&
+             data.color is string &&
+             data.rotation is string;
     }
 
     // Collection matches

@@ -109,6 +109,8 @@ interface GratitudeEntry {
   id: string;
   text: string;
   date: string;
+  color?: string;
+  rotation?: string;
 }
 
 interface MoodEntry {
@@ -480,11 +482,32 @@ export default function App() {
 
   const addGratitude = async (text: string) => {
     if (!user) return;
+    
+    // A palette of warm, aesthetic sticky note colors
+    const colors = [
+      'bg-amber-100/90 text-amber-900 border-amber-200',
+      'bg-rose-100/90 text-rose-900 border-rose-200',
+      'bg-blue-100/90 text-blue-900 border-blue-200',
+      'bg-emerald-100/90 text-emerald-900 border-emerald-200',
+      'bg-violet-100/90 text-violet-900 border-violet-200',
+      'bg-orange-100/90 text-orange-900 border-orange-200'
+    ];
+    
+    // Gentle rotations to create a natural "wall" look
+    const rotations = [
+      'rotate-1', '-rotate-1', 'rotate-2', '-rotate-2', 'rotate-3', '-rotate-3'
+    ];
+
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    const randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
+
     try {
       await addDoc(collection(db, `users/${user.uid}/gratitudeList`), {
         userId: user.uid,
         text,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
+        color: randomColor,
+        rotation: randomRotation
       });
     } catch (e) { console.error(e); }
   };
