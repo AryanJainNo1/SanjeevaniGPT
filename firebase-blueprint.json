@@ -1,0 +1,83 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" }
+      },
+      "required": ["name", "email"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "A chat session with Sanjeevani",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "evi": { "type": "number" },
+        "color": { "type": "string" },
+        "lastUpdated": { "type": "string" },
+        "userId": { "type": "string" }
+      },
+      "required": ["title", "evi", "color", "lastUpdated", "userId"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A single message in a conversation",
+      "type": "object",
+      "properties": {
+        "role": { "type": "string", "enum": ["user", "model"] },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["role", "text", "timestamp"]
+    },
+    "MoodEntry": {
+      "title": "MoodEntry",
+      "description": "A daily mood check-in",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "mood": { "type": "number" },
+        "note": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["userId", "mood", "note", "date"]
+    },
+    "GratitudeEntry": {
+      "title": "GratitudeEntry",
+      "description": "A gratitude note",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "text": { "type": "string" },
+        "date": { "type": "string" }
+      },
+      "required": ["userId", "text", "date"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Base user data"
+    },
+    "/users/{userId}/conversations/{convId}": {
+      "schema": "Conversation",
+      "description": "User's chat sessions"
+    },
+    "/users/{userId}/conversations/{convId}/messages/{msgId}": {
+      "schema": "Message",
+      "description": "Messages within a session"
+    },
+    "/users/{userId}/moodHistory/{moodId}": {
+      "schema": "MoodEntry",
+      "description": "User's mood tracking entries"
+    },
+    "/users/{userId}/gratitudeList/{gratitudeId}": {
+      "schema": "GratitudeEntry",
+      "description": "User's gratitude notes"
+    }
+  }
+}
