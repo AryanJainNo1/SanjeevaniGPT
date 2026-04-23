@@ -55,9 +55,10 @@
         "text": { "type": "string" },
         "date": { "type": "string" },
         "color": { "type": "string" },
-        "rotation": { "type": "string" }
+        "rotation": { "type": "string" },
+        "mainIdea": { "type": "string" }
       },
-      "required": ["userId", "text", "date", "color", "rotation"]
+      "required": ["userId", "text", "date", "color", "rotation", "mainIdea"]
     }
   },
   "firestore": {

@@ -1,35 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Inter:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Cormorant Garamond", serif;
+  --font-serif: "Playfair Display", serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  /* Core Foundation - Slightly softer shades */
-  --color-obsidian: #08090B;
-  --color-graphite: #121418;
-  --color-slate-steel: #1E2228;
+  /* Core Foundation - Deep Premium Obsidian */
+  --color-obsidian: #050505;
+  --color-graphite: #0E0F11;
+  --color-slate-steel: #161A1D;
 
-  /* Primary Accent - Soothing variations */
-  --color-emerald: #00BFA5;
-  --color-mint: #84FFEB;
+  /* Primary Accent - Ethereal Mint */
+  --color-emerald: #00D1B2;
+  --color-mint: #B5FBF0;
 
-  /* Secondary Accent */
-  --color-violet: #5143FB;
-  --color-indigo-elec: #7A69FF;
+  /* Secondary Accent - Cosmic Indigo */
+  --color-violet: #6366F1;
+  --color-indigo-elec: #818CF8;
 
-  /* Neutral */
-  --color-soft-white: #F0F2F5;
+  /* Neutral - Bone White */
+  --color-soft-white: #F9FAFB;
   --color-cool-light: #94A3B8;
 
-  /* Luxury Accent */
-  --color-champagne: #D1B881;
+  /* Luxury Accent - Pure Champagne */
+  --color-champagne: #DCD7C9;
 }
 
 @layer base {
   body {
-    @apply antialiased text-soft-white bg-obsidian selection:bg-emerald/20 transition-colors duration-1000;
+    @apply antialiased text-soft-white bg-obsidian selection:bg-white/10 transition-colors duration-1000 overflow-hidden;
     min-height: 100vh;
     cursor: default;
   }
@@ -37,46 +37,48 @@
 
 @layer components {
   .luxury-glass {
-    @apply bg-graphite/30 backdrop-blur-[32px] border border-white/5 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.3)];
-    transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    @apply bg-white/[0.01] backdrop-blur-[40px] border border-white/[0.08] rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)];
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .luxury-card {
-    @apply bg-graphite/50 backdrop-blur-xl border border-white/5 rounded-3xl;
-    transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    @apply bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] rounded-3xl shadow-xl;
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .accent-glow {
-    @apply shadow-[0_0_30px_rgba(0,194,168,0.15)];
+    @apply shadow-[0_0_40px_rgba(0,209,178,0.1)];
   }
 
   .chat-bubble-bot-luxury {
-    @apply bg-white/[0.03] backdrop-blur-md border border-white/5 rounded-3xl rounded-tl-none shadow-sm;
+    @apply bg-white/[0.03] backdrop-blur-lg border border-white/[0.05] rounded-[1.75rem] rounded-tl-none shadow-sm;
   }
 
   .chat-bubble-user-luxury {
-    @apply bg-emerald/5 border border-emerald/10 rounded-3xl rounded-tr-none shadow-none;
+    @apply bg-emerald/[0.1] border border-emerald/[0.05] rounded-[1.75rem] rounded-tr-none shadow-none;
+  }
+
+  .noise-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    @apply fixed inset-0 opacity-[0.03] pointer-events-none z-[9999];
+  }
+
+  .smooth-reveal {
+    animation: smooth-reveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes smooth-reveal {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   .buttery-pulse {
-    animation: buttery-pulse 8s ease-in-out infinite;
+    animation: buttery-pulse 10s ease-in-out infinite;
   }
 
   @keyframes buttery-pulse {
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.05); }
-  }
-
-  .markdown-body {
-    @apply space-y-3;
-  }
-  
-  .markdown-body p {
-    @apply leading-[1.8] opacity-90;
-  }
-
-  .markdown-body strong {
-    @apply text-mint font-semibold tracking-wide;
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.02); }
   }
 
   .scrollbar-thin {

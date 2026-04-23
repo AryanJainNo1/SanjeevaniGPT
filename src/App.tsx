@@ -111,6 +111,7 @@ interface GratitudeEntry {
   date: string;
   color?: string;
   rotation?: string;
+  mainIdea?: string;
 }
 
 interface MoodEntry {
@@ -507,23 +508,92 @@ export default function App() {
   const addGratitude = async (text: string) => {
     if (!user) return;
     
-    // A palette of warm, aesthetic sticky note colors
+    // A comprehensive palette of 48 aesthetic sticky note styles
     const colors = [
-      'bg-amber-100/90 text-amber-900 border-amber-200',
-      'bg-rose-100/90 text-rose-900 border-rose-200',
-      'bg-blue-100/90 text-blue-900 border-blue-200',
-      'bg-emerald-100/90 text-emerald-900 border-emerald-200',
-      'bg-violet-100/90 text-violet-900 border-violet-200',
-      'bg-orange-100/90 text-orange-900 border-orange-200'
+      // Pure Hues
+      'bg-red-500/90 text-white border-red-600', // Red
+      'bg-orange-600/90 text-white border-orange-700', // Red-Orange
+      'bg-orange-500/90 text-white border-orange-600', // Orange
+      'bg-amber-500/90 text-amber-950 border-amber-600', // Yellow-Orange
+      'bg-yellow-400/90 text-yellow-950 border-yellow-500', // Yellow
+      'bg-lime-400/90 text-lime-950 border-lime-500', // Yellow-Green
+      'bg-green-500/90 text-white border-green-600', // Green
+      'bg-teal-500/90 text-white border-teal-600', // Blue-Green
+      'bg-blue-500/90 text-white border-blue-600', // Blue
+      'bg-indigo-500/90 text-white border-indigo-600', // Blue-Violet
+      'bg-violet-500/90 text-white border-violet-600', // Violet
+      'bg-fuchsia-500/90 text-white border-fuchsia-600', // Red-Violet
+
+      // Tints (Lighter)
+      'bg-red-100/90 text-red-900 border-red-200', // Tint of Red
+      'bg-orange-100/90 text-orange-900 border-orange-200', // Tint of Red-Orange
+      'bg-orange-50/90 text-orange-900 border-orange-200', // Tint of Orange
+      'bg-amber-100/90 text-amber-900 border-amber-200', // Tint of Yellow-Orange
+      'bg-yellow-100/90 text-yellow-900 border-yellow-200', // Tint of Yellow
+      'bg-lime-100/90 text-lime-900 border-lime-200', // Tint of Yellow-Green
+      'bg-green-100/90 text-green-900 border-green-200', // Tint of Green
+      'bg-teal-100/90 text-teal-900 border-teal-200', // Tint of Blue-Green
+      'bg-blue-100/90 text-blue-900 border-blue-200', // Tint of Blue
+      'bg-indigo-100/90 text-indigo-900 border-indigo-200', // Tint of Blue-Violet
+      'bg-violet-100/90 text-violet-900 border-violet-200', // Tint of Violet
+      'bg-fuchsia-100/90 text-fuchsia-900 border-fuchsia-200', // Tint of Red-Violet
+
+      // Tones (Muted/Gayer)
+      'bg-red-300/80 text-red-950 border-red-400', // Tone of Red
+      'bg-orange-300/80 text-orange-950 border-orange-400', // Tone of Red-Orange
+      'bg-orange-200/80 text-orange-950 border-orange-300', // Tone of Orange
+      'bg-amber-200/80 text-amber-950 border-amber-300', // Tone of Yellow-Orange
+      'bg-yellow-200/80 text-yellow-950 border-yellow-300', // Tone of Yellow
+      'bg-lime-200/80 text-lime-950 border-lime-300', // Tone of Yellow-Green
+      'bg-green-300/80 text-green-950 border-green-400', // Tone of Green
+      'bg-teal-300/80 text-teal-950 border-teal-400', // Tone of Blue-Green
+      'bg-blue-300/80 text-blue-950 border-blue-400', // Tone of Blue
+      'bg-indigo-300/80 text-indigo-950 border-indigo-400', // Tone of Blue-Violet
+      'bg-violet-300/80 text-violet-950 border-violet-400', // Tone of Violet
+      'bg-fuchsia-300/80 text-fuchsia-950 border-fuchsia-400', // Tone of Red-Violet
+
+      // Shades (Darker)
+      'bg-red-800/90 text-red-50 border-red-900', // Shade of Red
+      'bg-orange-900/90 text-orange-50 border-black', // Shade of Red-Orange
+      'bg-orange-800/90 text-orange-50 border-orange-900', // Shade of Orange
+      'bg-amber-800/90 text-amber-50 border-amber-900', // Shade of Yellow-Orange
+      'bg-yellow-700/90 text-yellow-50 border-yellow-800', // Shade of Yellow
+      'bg-lime-800/90 text-lime-50 border-lime-900', // Shade of Yellow-Green
+      'bg-green-800/90 text-green-50 border-green-900', // Shade of Green
+      'bg-teal-800/90 text-teal-50 border-teal-900', // Shade of Blue-Green
+      'bg-blue-800/90 text-blue-50 border-blue-900', // Shade of Blue
+      'bg-indigo-800/90 text-indigo-50 border-indigo-900', // Shade of Blue-Violet
+      'bg-violet-800/90 text-violet-50 border-violet-900', // Shade of Violet
+      'bg-fuchsia-800/90 text-fuchsia-50 border-fuchsia-900' // Shade of Red-Violet
     ];
     
-    // Gentle rotations to create a natural "wall" look
+    // More varied and nuanced rotations for a truly organic, hand-placed wall aesthetic
     const rotations = [
-      'rotate-1', '-rotate-1', 'rotate-2', '-rotate-2', 'rotate-3', '-rotate-3'
+      'rotate-1', '-rotate-1', 'rotate-2', '-rotate-2', 'rotate-3', '-rotate-3', 
+      'rotate-[4deg]', '-rotate-[4deg]', 'rotate-[5deg]', '-rotate-[5deg]',
+      'rotate-[0.5deg]', '-rotate-[0.5deg]', 'rotate-[1.5deg]', '-rotate-[1.5deg]',
+      'skew-x-1', '-skew-x-1', 'rotate-[3.5deg]', '-rotate-[3.5deg]'
     ];
 
     const randomColor = colors[Math.floor(Math.random() * colors.length)];
     const randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
+
+    let mainIdea = "Reflect";
+    try {
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Convert this gratitude entry into exactly ONE powerful, meaningful word that captures its deepest essence. 
+        Entry: "${text}"
+        Reply with ONLY that one word. No punctuation.`
+      });
+      
+      const summarized = result.text?.trim().replace(/[^a-zA-Z]/g, '');
+      if (summarized) {
+        mainIdea = summarized.charAt(0).toUpperCase() + summarized.slice(1).toLowerCase();
+      }
+    } catch (err) {
+      console.error("AI Summarization failed:", err);
+    }
 
     try {
       await addDoc(collection(db, `users/${user.uid}/gratitudeList`), {
@@ -531,7 +601,8 @@ export default function App() {
         text,
         date: new Date().toISOString(),
         color: randomColor,
-        rotation: randomRotation
+        rotation: randomRotation,
+        mainIdea
       });
     } catch (e) { console.error(e); }
   };
@@ -686,22 +757,35 @@ export default function App() {
 
   return (
     <div className="h-screen w-full flex flex-col md:flex-row p-0 md:p-6 gap-0 md:gap-6 overflow-hidden bg-obsidian relative">
-      {/* Dynamic Background Glow */}
-      <motion.div 
-        animate={{ 
-          backgroundColor: atmosphericColor, 
-          opacity: [0.03, 0.08, 0.03],
-          scale: [1.4, 1.6, 1.4]
-        }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        className="fixed inset-0 pointer-events-none blur-[160px] rounded-full z-0"
-      />
+      {/* Ultimate Cinematic Background */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.2, 1],
+            rotate: [0, 360],
+          }}
+          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(0,209,178,0.08)_0%,transparent_70%)] blur-[120px] -rotate-12"
+        />
+        <motion.div 
+          animate={{ 
+            scale: [1.2, 1, 1.2],
+            rotate: [360, 0],
+          }}
+          transition={{ duration: 150, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-[-20%] right-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.08)_0%,transparent_70%)] blur-[120px] rotate-12"
+        />
+        <div className="absolute top-1/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent -rotate-[15deg] transform origin-left" />
+        <div className="absolute bottom-1/4 right-0 w-full h-[1px] bg-gradient-to-l from-transparent via-white/5 to-transparent rotate-[25deg] transform origin-right" />
+      </div>
+
+      <div className="noise-overlay" />
       
       {/* Ethereal Mist Layer */}
       <motion.div 
-        animate={{ opacity: [0.1, 0.2, 0.1] }}
+        animate={{ opacity: [0.05, 0.1, 0.05] }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        className="fixed inset-0 pointer-events-none z-10 mix-blend-overlay bg-[url('https://picsum.photos/seed/mist/1920/1080?blur=10')] bg-cover" 
+        className="fixed inset-0 pointer-events-none z-10 mix-blend-screen bg-[url('https://images.unsplash.com/photo-1519751138087-5bf79df62d5b?auto=format&fit=crop&q=80&w=2000&blur=100')] bg-cover" 
       />
 
       {/* Mobile Header */}
@@ -756,12 +840,15 @@ export default function App() {
             </div>
           </div>
           <SoulPrint evi={evi} color={atmosphericColor} />
-          <h2 className="text-xl font-bold text-soft-white font-serif tracking-tight mt-4">Sanjeevani <span className="text-emerald">GPT</span></h2>
-          <div className="mt-2 flex items-center justify-center gap-2">
+          <h2 className="text-xl font-bold text-soft-white font-serif tracking-tight mt-4 -skew-x-2">Sanjeevani <span className="text-emerald italic">GPT</span></h2>
+          <div className="mt-2 flex items-center justify-center gap-2 -rotate-1">
             <div className="w-2 h-2 rounded-full bg-emerald animate-pulse accent-glow" />
             <p className="text-[10px] font-bold text-cool-light tracking-widest uppercase italic">Emotional Vitality Index: {evi}%</p>
           </div>
         </div>
+
+        <div className="absolute top-48 -left-12 w-32 h-64 bg-emerald/5 -rotate-[35deg] blur-3xl pointer-events-none" />
+        <div className="absolute bottom-20 -right-12 w-32 h-64 bg-violet/5 rotate-[45deg] blur-3xl pointer-events-none" />
 
         <nav className="flex flex-col gap-2 flex-1 relative z-10 overflow-y-auto no-scrollbar pb-6 mt-4">
           <div className="hidden md:flex items-center justify-between mb-1 ml-3 px-2">
@@ -880,7 +967,7 @@ export default function App() {
               </div>
             </div>
             <div>
-              <h1 className="text-sm font-bold text-soft-white tracking-wide">
+              <h1 className="text-sm font-bold text-soft-white tracking-wide -skew-x-2">
                 {activeTab === 'chat' ? 'Sanjeevani Empathy Engine' : activeTab === 'journal' ? 'Reflective Journal' : activeTab === 'breath' ? 'Harmonized Breath' : 'Gratitude Sanctuary'}
               </h1>
               <p className="text-[10px] text-cool-light font-medium uppercase tracking-tighter">Private session for <span className="text-emerald">{user.name}</span></p>
@@ -920,33 +1007,43 @@ export default function App() {
         <div className="flex-1 overflow-hidden relative z-20">
           <AnimatePresence mode="wait">
             {activeTab === 'chat' && (
-              <ChatView 
-                messages={messages} 
-                scrollRef={scrollRef} 
-                isLoading={isLoading} 
-                input={input} 
-                setInput={setInput} 
-                handleSend={sendMessage} 
-                user={user} 
-                evi={evi}
-                atmosphericColor={atmosphericColor}
-              />
+              <div className="h-full smooth-reveal">
+                <ChatView 
+                  messages={messages} 
+                  scrollRef={scrollRef} 
+                  isLoading={isLoading} 
+                  input={input} 
+                  setInput={setInput} 
+                  handleSend={sendMessage} 
+                  user={user} 
+                  evi={evi}
+                  atmosphericColor={atmosphericColor}
+                />
+              </div>
             )}
             {activeTab === 'journal' && (
-              <JournalView 
-                moodHistory={moodHistory} 
-                addMood={addMood} 
-                deleteMood={deleteMood} 
-                ai={ai}
-              />
+              <div className="h-full smooth-reveal">
+                <JournalView 
+                  moodHistory={moodHistory} 
+                  addMood={addMood} 
+                  deleteMood={deleteMood} 
+                  ai={ai}
+                />
+              </div>
             )}
-            {activeTab === 'breath' && <BreathView />}
+            {activeTab === 'breath' && (
+              <div className="h-full smooth-reveal">
+                <BreathView />
+              </div>
+            )}
             {activeTab === 'gratitude' && (
-              <GratitudeView 
-                list={gratitudeList} 
-                addGratitude={addGratitude}
-                deleteGratitude={deleteGratitude}
-              />
+              <div className="h-full smooth-reveal">
+                <GratitudeView 
+                  list={gratitudeList} 
+                  addGratitude={addGratitude}
+                  deleteGratitude={deleteGratitude}
+                />
+              </div>
             )}
           </AnimatePresence>
         </div>
@@ -1046,73 +1143,55 @@ function SoulPrint({ evi, color }: { evi: number, color: string }) {
     let animationFrameId: number;
     let time = 0;
     
-    // Scale for high resolution
     const dpr = window.devicePixelRatio || 1;
     canvas.width = 160 * dpr;
     canvas.height = 160 * dpr;
     ctx.scale(dpr, dpr);
     
     const render = () => {
-      time += 0.008;
+      time += 0.012;
       ctx.clearRect(0, 0, 160, 160);
       
       const centerX = 80;
       const centerY = 80;
-      const baseRadius = 35 + (evi / 10);
+      const baseRadius = 38 + (evi / 8);
       
-      // Ambient Glow
-      const glowGrad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 80);
-      glowGrad.addColorStop(0, `${color}15`);
-      glowGrad.addColorStop(0.5, `${color}05`);
-      glowGrad.addColorStop(1, 'transparent');
-      ctx.fillStyle = glowGrad;
-      ctx.fillRect(0, 0, 160, 160);
+      // Dynamic Ethereal Aura
+      const auraGrad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 75);
+      auraGrad.addColorStop(0, `${color}25`);
+      auraGrad.addColorStop(0.5, `${color}08`);
+      auraGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = auraGrad;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 75, 0, Math.PI * 2);
+      ctx.fill();
 
-      ctx.shadowBlur = 25;
-      ctx.shadowColor = color;
-      ctx.lineWidth = 1.2;
-      
-      for (let layer = 0; layer < 4; layer++) {
+      for (let layer = 0; layer < 6; layer++) {
         ctx.beginPath();
-        const alpha = (0.7 - layer * 0.15).toString(16).split('.')[1]?.substring(0, 2) || '40';
-        ctx.strokeStyle = `${color}${alpha}`;
+        const opacity = Math.max(0.08, 0.45 - layer * 0.07);
+        ctx.strokeStyle = `${color}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`;
+        ctx.lineWidth = 1.6 - layer * 0.22;
+        ctx.lineCap = 'round';
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = color;
         
-        for (let angle = 0; angle < Math.PI * 2; angle += 0.05) {
-          const noise = Math.sin(angle * 4 + time + layer) * 5 + 
-                        Math.cos(angle * 2 - time * 0.8) * 8 +
-                        Math.sin(time * 0.5) * 4;
+        for (let angle = 0; angle < Math.PI * 2; angle += 0.015) {
+          const frequency = 2 + layer * 0.5;
+          const amplitude = (10 + layer * 3) * (evi / 100);
           
-          const radius = baseRadius + noise - (layer * 12);
-          const x = centerX + Math.cos(angle) * (radius > 0 ? radius : 5);
-          const y = centerY + Math.sin(angle) * (radius > 0 ? radius : 5);
+          const noise = Math.sin(angle * frequency + time * (0.8 + layer * 0.15)) * amplitude +
+                        Math.cos(angle * (frequency + 2.5) - time * 0.6) * (amplitude / 1.8) +
+                        Math.sin(angle * 12 + time * 2) * (amplitude / 6);
+          
+          const r = baseRadius + noise;
+          const x = centerX + Math.cos(angle) * r;
+          const y = centerY + Math.sin(angle) * r;
           
           if (angle === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
         }
         ctx.closePath();
         ctx.stroke();
-      }
-      
-      // Consciousness particles
-      const count = 5 + Math.floor(evi / 15);
-      for (let i = 0; i < count; i++) {
-        const offset = i * (Math.PI * 2 / count);
-        const pRadius = baseRadius + 20 + Math.sin(time + i) * 15;
-        const px = centerX + Math.cos(time * 0.4 + offset) * pRadius;
-        const py = centerY + Math.sin(time * 0.4 + offset) * pRadius;
-        
-        ctx.beginPath();
-        ctx.arc(px, py, 1, 0, Math.PI * 2);
-        ctx.fillStyle = `${color}80`;
-        ctx.fill();
-        
-        if (evi > 75 && Math.sin(time + i) > 0.9) {
-          ctx.beginPath();
-          ctx.moveTo(centerX, centerY);
-          ctx.lineTo(px, py);
-          ctx.strokeStyle = `${color}10`;
-          ctx.stroke();
-        }
       }
       
       animationFrameId = requestAnimationFrame(render);
@@ -1123,8 +1202,9 @@ function SoulPrint({ evi, color }: { evi: number, color: string }) {
   }, [evi, color]);
   
   return (
-    <div className="relative w-40 h-40 mx-auto -mb-4 -mt-4">
-      <canvas ref={canvasRef} className="w-full h-full" style={{ width: 160, height: 160 }} />
+    <div className="relative group flex items-center justify-center -mb-4 -mt-4">
+      <div className="absolute inset-0 bg-white/5 blur-3xl rounded-full scale-110 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
+      <canvas ref={canvasRef} className="w-40 h-40 drop-shadow-[0_0_25px_rgba(0,209,178,0.25)] relative z-10" />
       <div className="absolute inset-x-0 bottom-6 text-[8px] font-mono text-soft-white/10 select-none pointer-events-none tracking-[0.5em] uppercase">Vibrancy</div>
     </div>
   );
@@ -1289,10 +1369,11 @@ function JournalView({ moodHistory, addMood, deleteMood, ai }: any) {
     >
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 h-full overflow-hidden">
         <div className="lg:col-span-3 flex flex-col gap-6 overflow-y-auto md:overflow-hidden pb-4 md:pb-0">
-          <div className="luxury-card p-6 rounded-3xl space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-soft-white font-bold flex items-center gap-2 italic">
-                <Sparkles size={16} className="text-emerald" /> {prompt}
+          <div className="luxury-card p-8 rounded-3xl space-y-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald/5 blur-3xl -rotate-12 pointer-events-none" />
+            <div className="flex justify-between items-center relative z-10">
+              <h3 className="text-soft-white font-bold flex items-center gap-2 italic -skew-x-2">
+                <Sparkles size={16} className="text-emerald animate-pulse" /> {prompt}
               </h3>
               <button 
                 onClick={generatePrompt}
@@ -1488,9 +1569,9 @@ function BreathView() {
 
       <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-16 items-center relative z-10">
         <div className="flex flex-col gap-8 order-2 md:order-1">
-          <div className="space-y-2">
-            <h3 className="text-3xl font-serif font-bold text-soft-white">Breathe with Me</h3>
-            <p className="text-cool-light text-sm italic">Select a technique that resonates with your current state.</p>
+          <div className="space-y-2 -skew-x-2">
+            <h3 className="text-3xl font-serif font-bold text-soft-white select-none">Breathe with <span className="italic text-emerald">Me</span></h3>
+            <p className="text-cool-light text-xs font-bold tracking-widest uppercase opacity-60">Harmonize Your Presence</p>
           </div>
 
           <div className="space-y-4">
@@ -1614,10 +1695,10 @@ function GratitudeView({ list, addGratitude, deleteGratitude }: any) {
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(#ffffff05_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
 
-      <div className="max-w-5xl mx-auto w-full flex flex-col h-full relative z-10">
-        <div className="text-center mb-10 space-y-2">
-          <h3 className="text-4xl font-serif font-bold text-soft-white tracking-tight">The Wall of Gratitude</h3>
-          <p className="text-cool-light text-sm italic opacity-70">A collective of light, one note at a time.</p>
+      <div className="max-w-[1300px] mx-auto w-full flex flex-col h-full relative z-10">
+        <div className="text-center mb-10 space-y-2 -skew-x-2">
+          <h3 className="text-4xl font-serif font-bold text-soft-white tracking-tight">The Wall of <span className="italic text-champagne">Gratitude</span></h3>
+          <p className="text-cool-light text-[10px] uppercase font-bold tracking-[0.2em] opacity-70">A collective of light, one note at a time.</p>
         </div>
 
         {/* Input Bar */}
@@ -1641,8 +1722,8 @@ function GratitudeView({ list, addGratitude, deleteGratitude }: any) {
         </div>
 
         {/* The Wall */}
-        <div className="flex-1 overflow-y-auto pr-4 no-scrollbar pb-20">
-          <div className="flex flex-wrap items-start justify-center gap-8 content-start">
+        <div className="flex-1 overflow-y-auto pr-2 no-scrollbar pb-20">
+          <div className="flex flex-wrap items-start justify-center gap-4 content-start">
             {list.length === 0 && (
               <div className="w-full py-20 text-center">
                 <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -1653,40 +1734,118 @@ function GratitudeView({ list, addGratitude, deleteGratitude }: any) {
             )}
             <AnimatePresence>
               {list.map((item: any) => (
-                <motion.div 
-                  key={item.id}
-                  layout
-                  initial={{ scale: 0.8, opacity: 0, y: 20 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  whileHover={{ scale: 1.05, zIndex: 50, rotate: 0 }}
-                  className={`relative p-8 min-h-[120px] h-fit w-[260px] md:w-[320px] flex flex-col justify-between shadow-2xl border-b-4 border-r-2 ${item.color || 'bg-amber-200/90 text-amber-900 border-amber-300'} ${item.rotation || 'rotate-0'} transition-all cursor-default group m-1`}
-                >
-                  <button 
-                    onClick={() => deleteGratitude(item.id)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                  
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-5 bg-white/30 backdrop-blur-sm rounded-sm pointer-events-none skew-x-3" />
-
-                  <p className="font-serif italic text-xl md:text-2xl leading-relaxed break-words mb-6">
-                    {item.text}
-                  </p>
-
-                  <div className="mt-auto pt-6 border-t border-black/5 flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">
-                      {new Date(item.date).toLocaleDateString()}
-                    </span>
-                    <Sparkles size={12} className="text-black/30" />
-                  </div>
-                </motion.div>
+                <GratitudeNote key={item.id} item={item} deleteGratitude={deleteGratitude} />
               ))}
             </AnimatePresence>
           </div>
         </div>
       </div>
     </motion.section>
+  );
+}
+
+function GratitudeNote({ item, deleteGratitude }: { item: any, deleteGratitude: (id: string) => void }) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const getMainIdea = (text: string) => {
+    const stopWords = new Set(['i', 'am', 'the', 'a', 'an', 'and', 'but', 'if', 'or', 'as', 'what', 'which', 'this', 'that', 'these', 'those', 'then', 'just', 'so', 'for', 'with', 'in', 'on', 'at', 'by', 'today', 'was', 'were', 'is', 'it', 'my', 'me']);
+    const words = text.trim().toLowerCase().split(/\s+/).map(w => w.replace(/[^a-z]/g, '')).filter(w => w.length > 2);
+    const substantialWords = words.filter(w => !stopWords.has(w));
+    
+    if (substantialWords.length > 0) {
+      const main = substantialWords.sort((a, b) => b.length - a.length)[0];
+      return main.charAt(0).toUpperCase() + main.slice(1);
+    }
+    return words.length > 0 ? words[0].charAt(0).toUpperCase() + words[0].slice(1) : "Reflect";
+  };
+
+  const title = item.mainIdea || getMainIdea(item.text);
+
+  return (
+    <motion.div 
+      layout
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.9, opacity: 0 }}
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+      onClick={() => setIsOpen(!isOpen)}
+      className={`relative p-4 h-[160px] w-[160px] md:h-[180px] md:w-[180px] flex flex-col shadow-lg border-b-2 border-r-2 ${item.color || 'bg-amber-100/90 text-amber-900 border-amber-200'} ${item.rotation || 'rotate-0'} transition-all duration-500 cursor-default group m-2 overflow-hidden shrink-0`}
+      style={{ transformOrigin: 'top center' }}
+    >
+      <button 
+        onClick={(e) => { e.stopPropagation(); deleteGratitude(item.id); }}
+        className="absolute top-1 right-1 opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1 z-20"
+      >
+        <Trash2 size={10} />
+      </button>
+
+      {/* Sticky Tape Effect at Top */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-black/5 pointer-events-none z-10" />
+      
+      <div className="flex flex-col h-full relative z-0">
+        <motion.div layout className="mb-1">
+          <span className="text-[8px] font-bold uppercase tracking-[0.1em] opacity-40 block mb-0.5">
+            {new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+          </span>
+          
+          <motion.h4 
+            layout
+            className={`font-serif font-bold text-lg leading-tight transition-all duration-700 ${isOpen ? 'opacity-5 blur-sm translate-y-1' : 'opacity-100'}`}
+          >
+            {title}
+          </motion.h4>
+        </motion.div>
+
+        <div className="relative flex-1">
+          <motion.div
+            initial={false}
+            animate={{ 
+              height: isOpen ? '100%' : '0%',
+              opacity: isOpen ? 1 : 0,
+              scaleY: isOpen ? 1 : 0.95
+            }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="origin-top"
+          >
+            <p className="font-serif italic text-sm md:text-base leading-snug break-words py-1">
+              {item.text}
+            </p>
+          </motion.div>
+        </div>
+
+        <motion.div 
+          layout 
+          className="mt-2 pt-2 border-t border-black/5 flex items-center justify-between"
+        >
+          <div className="flex gap-1">
+            {[1, 2, 3].map(i => (
+              <motion.div 
+                key={i} 
+                animate={isOpen ? { y: [0, -1.5, 0] } : { y: 0 }}
+                transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.2 }}
+                className="w-0.5 h-0.5 rounded-full bg-current opacity-10" 
+              />
+            ))}
+          </div>
+          <motion.div
+            animate={{ 
+              rotate: isOpen ? 90 : 0,
+              scale: isOpen ? 1.1 : 1,
+              color: isOpen ? "#00BFA5" : "inherit"
+            }}
+          >
+            <Sparkles size={10} className="opacity-30" />
+          </motion.div>
+        </motion.div>
+      </div>
+
+      {/* Peel Shadow Overlay (Top to Bottom) */}
+      <motion.div 
+        initial={false}
+        animate={{ opacity: isOpen ? 0 : 0.1 }}
+        className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-transparent pointer-events-none"
+      />
+    </motion.div>
   );
 }
