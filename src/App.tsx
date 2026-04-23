@@ -638,42 +638,9 @@ export default function App() {
   }
 
   return (
-    <>
-      <div className="h-screen w-full flex flex-col md:flex-row p-0 md:p-6 gap-0 md:gap-6 overflow-hidden bg-obsidian relative">
-        {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between p-4 luxury-glass z-30 border-b border-white/5">
-          <div className="flex items-center gap-3">
-            <img src="/SGPT_logo.jpg" alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
-            <h1 className="font-serif font-bold text-soft-white text-lg">Sanjeevani</h1>
-          </div>
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-soft-white">
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-        <AnimatePresence>
-          {insight && (
-            <motion.div 
-              initial={{ x: 300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 300, opacity: 0 }}
-              className="fixed bottom-24 md:bottom-10 right-4 md:right-10 z-[100] luxury-glass p-6 pr-8 max-w-[280px] border-l-4 border-l-emerald shadow-2xl overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-2 opacity-20">
-                <Sparkles size={12} className="animate-spin-slow" />
-              </div>
-              <p className="text-[10px] font-bold text-emerald uppercase tracking-[0.2em] mb-2 font-mono">Sanjeevani Insight</p>
-              <p className="text-sm italic text-soft-white/90 leading-relaxed font-serif">"{insight.text}"</p>
-              <motion.div 
-                initial={{ width: "100%" }}
-                animate={{ width: "0%" }}
-                transition={{ duration: 8, ease: "linear" }}
-                className="absolute bottom-0 left-0 h-1 bg-emerald/30"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <motion.div 
+    <div className="h-screen w-full flex flex-col md:flex-row p-0 md:p-6 gap-0 md:gap-6 overflow-hidden bg-obsidian relative">
+      {/* Dynamic Background Glow */}
+      <motion.div 
         animate={{ backgroundColor: atmosphericColor, opacity: [0.03, 0.1, 0.03] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         className="fixed inset-0 pointer-events-none blur-[160px] rounded-full scale-150 z-0"
@@ -683,15 +650,38 @@ export default function App() {
       <div className="fixed inset-0 pointer-events-none z-10 opacity-30 mix-blend-overlay bg-[url('https://picsum.photos/seed/mist/1920/1080?blur=10')] bg-cover" />
 
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 luxury-glass z-30 border-b border-white/5">
+      <div className="md:hidden flex items-center justify-between p-4 luxury-glass z-30 border-b border-white/5 shrink-0">
         <div className="flex items-center gap-3">
-          <img src="/SGPT_logo.jpg" alt="Logo" className="w-8 h-8 rounded-lg" />
+          <img src="/SGPT_logo.jpg" alt="Logo" className="w-8 h-8 rounded-lg object-cover" />
           <h1 className="font-serif font-bold text-soft-white text-lg">Sanjeevani</h1>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-soft-white">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
+
+      <AnimatePresence>
+        {insight && (
+          <motion.div 
+            initial={{ x: 300, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: 300, opacity: 0 }}
+            className="fixed bottom-24 md:bottom-10 right-4 md:right-10 z-[100] luxury-glass p-6 pr-8 max-w-[280px] border-l-4 border-l-emerald shadow-2xl overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-2 opacity-20">
+              <Sparkles size={12} className="animate-spin-slow" />
+            </div>
+            <p className="text-[10px] font-bold text-emerald uppercase tracking-[0.2em] mb-2 font-mono">Sanjeevani Insight</p>
+            <p className="text-sm italic text-soft-white/90 leading-relaxed font-serif">"{insight.text}"</p>
+            <motion.div 
+              initial={{ width: "100%" }}
+              animate={{ width: "0%" }}
+              transition={{ duration: 8, ease: "linear" }}
+              className="absolute bottom-0 left-0 h-1 bg-emerald/30"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Sidebar - Hidden on mobile unless menu open */}
       <aside className={`fixed inset-y-0 left-0 w-72 luxury-glass flex flex-col p-6 shrink-0 z-40 transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:flex'}`}>
@@ -958,7 +948,6 @@ export default function App() {
         )}
       </AnimatePresence>
     </div>
-    </>
   );
 }
 

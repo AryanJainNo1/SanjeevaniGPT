@@ -77,7 +77,8 @@ service cloud.firestore {
         allow list: if isOwner(userId);
         allow get: if isOwner(userId) && isValidId(convId);
         allow create: if isOwner(userId) && isValidId(convId) && isValidConversation(request.resource.data, userId);
-        allow update: if isOwner(userId) && isValidId(convId) && isValidConversation(request.resource.data, userId);
+        allow update: if isOwner(userId) && isValidId(convId) && 
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'evi', 'color', 'lastUpdated']);
         allow delete: if isOwner(userId) && isValidId(convId);
 
         match /messages/{msgId} {
