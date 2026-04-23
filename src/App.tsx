@@ -121,7 +121,7 @@ interface MoodEntry {
 interface Conversation {
   id: string;
   title: string;
-  messages: Message[];
+  messages?: Message[];
   evi: number;
   color: string;
   lastUpdated: string;
@@ -734,7 +734,7 @@ export default function App() {
                   onClick={() => selectConversation(conv.id)}
                   className={`text-[10px] py-2 px-3 rounded-lg text-left truncate transition-all ${activeConversationId === conv.id ? 'bg-white/10 text-soft-white' : 'text-cool-light hover:text-soft-white hover:bg-white/5'}`}
                 >
-                  {conv.title === "New Reflection" && conv.messages.length > 1 ? conv.messages[1].text.substring(0, 20) + "..." : conv.title}
+                  {conv.title}
                 </button>
               ))}
             </div>
