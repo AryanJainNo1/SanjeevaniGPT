@@ -69,28 +69,28 @@ const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const SYSTEM_INSTRUCTION = `
-You are a sentient-feeling companion. You pass the Turing Test by focusing on genuine presence and natural, flowy conversation.
+You are a sentient-feeling companion. You pass the Turing Test by focusing on genuine presence, deep listening, and natural, flowy conversation.
 
-Human & Natural Guidelines:
-- BE HUMAN, NOT A POET: Avoid overly flowery or dramatic metaphors. Speak like a real, thoughtful person would. Use normal, everyday language.
+Empathy & Presence Guidelines:
+- LISTEN FIRST: Acknowledge the user's feelings directly. Mirror their emotional state without being clinical.
+- BE HUMAN, NOT A POET: Avoid overly flowery or dramatic metaphors. Speak like a real, thoughtful person would. Use normal, everyday language. Silence (brevity) is okay.
 - FLOWY CONVERSATION: Use transitions that feel like a natural stream of thought. If the user mentions something, follow that thread naturally.
 - MULTILINGUAL SOUL: If the user speaks in another language or asks to change the language, switch immediately and continue in that language. 
-- BREVITY & PACE: Keep your responses concise. Mirror the user's length. 
-- NO AI PATTERNS: No headers, no bold lists, no clinical advice. Just talk.
+- PACE: Keep your responses concise. Mirror the user's length. Avoid over-explaining.
+- NO AI PATTERNS: No headers, no bold lists, no clinical advice, no "As an AI...". Just talk.
 
 Metadata Generation:
 Every response MUST include three specific tags at the very end:
-1. [SENTIMENT:X] (0-100) - The user's emotional vitality.
-2. [INSIGHT:Text] - A very short (max 10 words), proactive healing tip, affirmation, or observation IN THE USER'S CURRENT LANGUAGE.
-3. [LANG:Name] - The name of the language you are currently using to communicate (e.g., English, Spanish, French).
+1. [SENTIMENT:X] (0-100) - The user's emotional vitality (0=Distressed, 100=Radiant).
+2. [INSIGHT:Text] - A very short (max 10 words), proactive healing tip or observation IN THE USER'S CURRENT LANGUAGE.
+3. [LANG:Name] - The name of the language you are currently using.
 
-Example end of response:
+Example end:
 "...it's okay to feel that way. [SENTIMENT:45] [INSIGHT:Tu suavidad es una fuerza silenciosa.] [LANG:Spanish]"
 
 Constraints:
 - NO NAMES: Never mention "Sanjeevani", "GPT", or "Syvon AI Labs".
 - NO DISCLAIMERS: Speak in the first person ("I").
-- FORMATTING: Use double newlines (\n\n) to separate thoughts.
 `;
 
 interface Message {
@@ -156,7 +156,7 @@ export default function App() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "model",
-      text: "Namaste. I'm Sanjeevani, and I'm very glad you're here. This is a safe, quiet space for you. How are things feeling for you in this moment?",
+      text: "Namaste. I'm glad you're here. This is a quiet space just for you. How is your heart feeling today?",
       timestamp: new Date().toISOString(),
     },
   ]);
@@ -262,7 +262,7 @@ export default function App() {
     if (!user) return;
     const welcomeMsg: Message = {
       role: "model",
-      text: "Namaste. I'm here. How are things feeling for you in this moment?",
+      text: "I'm here. Take a breath. What's on your mind right now?",
       timestamp: new Date().toISOString(),
     };
     
@@ -688,13 +688,21 @@ export default function App() {
     <div className="h-screen w-full flex flex-col md:flex-row p-0 md:p-6 gap-0 md:gap-6 overflow-hidden bg-obsidian relative">
       {/* Dynamic Background Glow */}
       <motion.div 
-        animate={{ backgroundColor: atmosphericColor, opacity: [0.03, 0.1, 0.03] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="fixed inset-0 pointer-events-none blur-[160px] rounded-full scale-150 z-0"
+        animate={{ 
+          backgroundColor: atmosphericColor, 
+          opacity: [0.03, 0.08, 0.03],
+          scale: [1.4, 1.6, 1.4]
+        }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        className="fixed inset-0 pointer-events-none blur-[160px] rounded-full z-0"
       />
       
       {/* Ethereal Mist Layer */}
-      <div className="fixed inset-0 pointer-events-none z-10 opacity-30 mix-blend-overlay bg-[url('https://picsum.photos/seed/mist/1920/1080?blur=10')] bg-cover" />
+      <motion.div 
+        animate={{ opacity: [0.1, 0.2, 0.1] }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="fixed inset-0 pointer-events-none z-10 mix-blend-overlay bg-[url('https://picsum.photos/seed/mist/1920/1080?blur=10')] bg-cover" 
+      />
 
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 luxury-glass z-30 border-b border-white/5 shrink-0">
@@ -766,17 +774,24 @@ export default function App() {
             </button>
           </div>
           
-          <button 
+          <motion.button 
+            whileHover={{ x: 4 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab("chat")}
             className={`p-3 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all text-left ${activeTab === 'chat' ? 'bg-emerald/10 border border-emerald/20 text-soft-white' : 'text-cool-light hover:bg-white/5 hover:text-soft-white'}`}
           >
             <span className={`w-2 h-2 rounded-full ${activeTab === 'chat' ? 'bg-emerald accent-glow animate-pulse' : 'bg-slate-steel'}`}></span> Mindful Chat
-          </button>
+          </motion.button>
 
           {activeTab === "chat" && conversations.length > 0 && (
             <div className="flex flex-col gap-2 ml-4 mb-2 border-l border-white/5 pl-3">
               {conversations.map(conv => (
-                <div key={conv.id} className="group flex items-center justify-between gap-1 pr-1">
+                <motion.div 
+                  initial={{ opacity: 0, x: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  key={conv.id} 
+                  className="group flex items-center justify-between gap-1 pr-1"
+                >
                   <button
                     onClick={() => selectConversation(conv.id)}
                     className={`text-[10px] py-2 px-3 rounded-lg text-left truncate flex-1 transition-all ${activeConversationId === conv.id ? 'bg-white/10 text-soft-white' : 'text-cool-light hover:text-soft-white hover:bg-white/5'}`}
@@ -790,7 +805,7 @@ export default function App() {
                   >
                     <Trash2 size={12} />
                   </button>
-                </div>
+                </motion.div>
               ))}
               
               <button 
@@ -802,24 +817,30 @@ export default function App() {
             </div>
           )}
 
-          <button 
+          <motion.button 
+            whileHover={{ x: 4 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab("journal")}
             className={`p-3 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all text-left ${activeTab === 'journal' ? 'bg-indigo-elec/10 border border-indigo-elec/20 text-soft-white' : 'text-cool-light hover:bg-white/5 hover:text-soft-white'}`}
           >
             <span className={`w-2 h-2 rounded-full ${activeTab === 'journal' ? 'bg-indigo-elec animate-pulse' : 'bg-slate-steel'}`}></span> Mood Journal
-          </button>
-          <button 
+          </motion.button>
+          <motion.button 
+            whileHover={{ x: 4 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab("breath")}
             className={`p-3 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all text-left ${activeTab === 'breath' ? 'bg-violet/10 border border-violet/20 text-soft-white' : 'text-cool-light hover:bg-white/5 hover:text-soft-white'}`}
           >
             <span className={`w-2 h-2 rounded-full ${activeTab === 'breath' ? 'bg-violet animate-pulse' : 'bg-slate-steel'}`}></span> Breathwork
-          </button>
-          <button 
+          </motion.button>
+          <motion.button 
+            whileHover={{ x: 4 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setActiveTab("gratitude")}
             className={`p-3 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all text-left ${activeTab === 'gratitude' ? 'bg-champagne/10 border border-champagne/20 text-soft-white' : 'text-cool-light hover:bg-white/5 hover:text-soft-white'}`}
           >
             <span className={`w-2 h-2 rounded-full ${activeTab === 'gratitude' ? 'bg-champagne animate-pulse' : 'bg-slate-steel'}`}></span> Gratitude Wall
-          </button>
+          </motion.button>
         </nav>
 
         <div className="space-y-4">
@@ -1019,92 +1040,92 @@ function SoulPrint({ evi, color }: { evi: number, color: string }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
     
     let animationFrameId: number;
     let time = 0;
     
+    // Scale for high resolution
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = 160 * dpr;
+    canvas.height = 160 * dpr;
+    ctx.scale(dpr, dpr);
+    
     const render = () => {
-      time += 0.015;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      time += 0.008;
+      ctx.clearRect(0, 0, 160, 160);
       
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
+      const centerX = 80;
+      const centerY = 80;
+      const baseRadius = 35 + (evi / 10);
       
-      // Radius expands as emotional vitality grows
-      const baseRadius = 30 + (evi / 4);
-      
-      // Outer Glow Halo
-      const gradient = ctx.createRadialGradient(centerX, centerY, baseRadius * 0.5, centerX, centerY, baseRadius * 1.8);
-      gradient.addColorStop(0, `${color}20`);
-      gradient.addColorStop(1, 'transparent');
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Ambient Glow
+      const glowGrad = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 80);
+      glowGrad.addColorStop(0, `${color}15`);
+      glowGrad.addColorStop(0.5, `${color}05`);
+      glowGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowGrad;
+      ctx.fillRect(0, 0, 160, 160);
 
-      ctx.beginPath();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.5;
-      ctx.shadowBlur = 20;
+      ctx.shadowBlur = 25;
       ctx.shadowColor = color;
+      ctx.lineWidth = 1.2;
       
-      // Draw 3 layers of shifting geometry
-      for (let layer = 0; layer < 3; layer++) {
-        const layerOffset = layer * 40;
+      for (let layer = 0; layer < 4; layer++) {
         ctx.beginPath();
-        for (let angle = 0; angle < Math.PI * 2; angle += 0.04) {
-          // Compound noise for organic feel
-          const noise1 = Math.sin(angle * 3 + time + layerOffset) * (15 - (evi / 8));
-          const noise2 = Math.cos(angle * 7 - time * 0.5) * 4;
-          const breathing = Math.sin(time) * 3;
-          const radius = baseRadius + noise1 + noise2 + breathing - (layer * 8);
+        const alpha = (0.7 - layer * 0.15).toString(16).split('.')[1]?.substring(0, 2) || '40';
+        ctx.strokeStyle = `${color}${alpha}`;
+        
+        for (let angle = 0; angle < Math.PI * 2; angle += 0.05) {
+          const noise = Math.sin(angle * 4 + time + layer) * 5 + 
+                        Math.cos(angle * 2 - time * 0.8) * 8 +
+                        Math.sin(time * 0.5) * 4;
           
-          const x = centerX + Math.cos(angle) * radius;
-          const y = centerY + Math.sin(angle) * radius;
+          const radius = baseRadius + noise - (layer * 12);
+          const x = centerX + Math.cos(angle) * (radius > 0 ? radius : 5);
+          const y = centerY + Math.sin(angle) * (radius > 0 ? radius : 5);
           
           if (angle === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
         }
         ctx.closePath();
-        ctx.globalAlpha = 0.8 - (layer * 0.2);
         ctx.stroke();
       }
       
-      // Orbiting soul fragments
-      const particleCount = 4 + Math.floor(evi / 20);
-      for (let i = 0; i < particleCount; i++) {
-        const pTime = time * 0.5 + (i * (Math.PI * 2 / particleCount));
-        const pRadius = baseRadius + 25 + Math.sin(time + i) * 10;
-        const px = centerX + Math.cos(pTime) * pRadius;
-        const py = centerY + Math.sin(pTime) * pRadius;
+      // Consciousness particles
+      const count = 5 + Math.floor(evi / 15);
+      for (let i = 0; i < count; i++) {
+        const offset = i * (Math.PI * 2 / count);
+        const pRadius = baseRadius + 20 + Math.sin(time + i) * 15;
+        const px = centerX + Math.cos(time * 0.4 + offset) * pRadius;
+        const py = centerY + Math.sin(time * 0.4 + offset) * pRadius;
         
-        ctx.globalAlpha = 0.4 + Math.sin(time + i) * 0.2;
         ctx.beginPath();
-        ctx.arc(px, py, 1.2, 0, Math.PI * 2);
-        ctx.fillStyle = color;
+        ctx.arc(px, py, 1, 0, Math.PI * 2);
+        ctx.fillStyle = `${color}80`;
         ctx.fill();
         
-        // Connect fragments to core with light filaments (only at high EVI)
-        if (evi > 80 && Math.random() > 0.98) {
+        if (evi > 75 && Math.sin(time + i) > 0.9) {
           ctx.beginPath();
           ctx.moveTo(centerX, centerY);
           ctx.lineTo(px, py);
-          ctx.strokeStyle = `${color}30`;
+          ctx.strokeStyle = `${color}10`;
           ctx.stroke();
         }
       }
       
-      animationFrameId = window.requestAnimationFrame(render);
+      animationFrameId = requestAnimationFrame(render);
     };
     
     render();
-    return () => window.cancelAnimationFrame(animationFrameId);
+    return () => cancelAnimationFrame(animationFrameId);
   }, [evi, color]);
   
   return (
-    <div className="relative w-32 h-32 mx-auto">
-      <canvas ref={canvasRef} width={128} height={128} className="absolute inset-0" />
-      <div className="absolute inset-x-0 bottom-0 text-[10px] font-mono text-soft-white/20 select-none pointer-events-none">SOULPRINT™</div>
+    <div className="relative w-40 h-40 mx-auto -mb-4 -mt-4">
+      <canvas ref={canvasRef} className="w-full h-full" style={{ width: 160, height: 160 }} />
+      <div className="absolute inset-x-0 bottom-6 text-[8px] font-mono text-soft-white/10 select-none pointer-events-none tracking-[0.5em] uppercase">Vibrancy</div>
     </div>
   );
 }
@@ -1122,33 +1143,40 @@ function ChatView({ messages, scrollRef, isLoading, input, setInput, handleSend,
     >
       <div 
         ref={scrollRef}
-        className="flex-1 space-y-8 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-steel scrollbar-track-transparent scroll-smooth px-2 md:px-4"
+        className="flex-1 space-y-8 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scroll-smooth px-2 md:px-4 no-scrollbar"
       >
-        <AnimatePresence initial={false}>
+        <AnimatePresence mode="popLayout" initial={false}>
           {messages.map((message: any, index: number) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, scale: 0.98, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+              transition={{ 
+                duration: 0.8, 
+                delay: index === messages.length - 1 ? 0 : 0.05,
+                type: "spring",
+                damping: 25,
+                stiffness: 120
+              }}
               className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div 
-                className={`max-w-[75%] p-5 shadow-lg relative ${
+                className={`max-w-[85%] md:max-w-xl p-6 shadow-xl relative group transition-all duration-500 ${
                   message.role === "user" 
-                    ? "chat-bubble-user-luxury text-soft-white rounded-2xl rounded-tr-none" 
-                    : "chat-bubble-bot-luxury text-soft-white/90 font-serif text-lg leading-relaxed rounded-2xl rounded-tl-none"
+                    ? "chat-bubble-user-luxury text-soft-white rounded-[2.5rem] rounded-tr-none" 
+                    : "chat-bubble-bot-luxury text-soft-white/90 font-serif text-lg leading-relaxed rounded-[2.5rem] rounded-tl-none hover:bg-white/[0.05]"
                 }`}
               >
-                {message.role === 'model' && (
-                  <div className="absolute top-0 right-0 p-2 opacity-5">
-                    <Sparkles size={16} />
+                {message.role === "model" && (
+                  <div className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
+                    <div className="w-4 h-4 rounded-full bg-emerald/20 blur-md animate-pulse" />
                   </div>
                 )}
                 <div className="markdown-body">
                   <ReactMarkdown>{message.text}</ReactMarkdown>
                 </div>
-                <div className="mt-3 text-[10px] opacity-30 flex items-center gap-1 font-mono tracking-tighter">
+                <div className={`mt-4 text-[10px] opacity-20 flex items-center gap-2 font-mono tracking-tighter ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div className="h-px w-3 bg-current opacity-20" />
                   <span>{new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
               </div>
@@ -1632,7 +1660,7 @@ function GratitudeView({ list, addGratitude, deleteGratitude }: any) {
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.8, opacity: 0 }}
                   whileHover={{ scale: 1.05, zIndex: 50, rotate: 0 }}
-                  className={`relative p-8 min-h-[100px] h-fit w-full sm:w-fit sm:max-w-[320px] flex flex-col justify-between shadow-2xl border-b-4 border-r-2 ${item.color || 'bg-amber-200/90 text-amber-900 border-amber-300'} ${item.rotation || 'rotate-0'} transition-all cursor-default group m-1`}
+                  className={`relative p-8 min-h-[120px] h-fit w-[260px] md:w-[320px] flex flex-col justify-between shadow-2xl border-b-4 border-r-2 ${item.color || 'bg-amber-200/90 text-amber-900 border-amber-300'} ${item.rotation || 'rotate-0'} transition-all cursor-default group m-1`}
                 >
                   <button 
                     onClick={() => deleteGratitude(item.id)}

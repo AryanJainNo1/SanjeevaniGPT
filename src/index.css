@@ -58,6 +58,15 @@
     @apply bg-emerald/5 border border-emerald/10 rounded-3xl rounded-tr-none shadow-none;
   }
 
+  .buttery-pulse {
+    animation: buttery-pulse 8s ease-in-out infinite;
+  }
+
+  @keyframes buttery-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+
   .markdown-body {
     @apply space-y-3;
   }
