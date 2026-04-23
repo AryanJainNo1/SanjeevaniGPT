@@ -582,9 +582,11 @@ export default function App() {
     try {
       const result = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Convert this gratitude entry into exactly ONE powerful, meaningful word that captures its deepest essence. 
+        contents: `Identify the single most impactful KEYWORD from this gratitude entry. 
+        Note: DO NOT simply summarize the context and DO NOT necessarily pick the longest word. 
+        Pick the precise word that is the core semantic anchor of the sentiment (e.g., if someone says "I love my coffee", the keyword is "Coffee").
         Entry: "${text}"
-        Reply with ONLY that one word. No punctuation.`
+        Reply with ONLY that one keyword. No punctuation.`
       });
       
       const summarized = result.text?.trim().replace(/[^a-zA-Z]/g, '');
@@ -1748,12 +1750,13 @@ function GratitudeNote({ item, deleteGratitude }: { item: any, deleteGratitude: 
   const [isOpen, setIsOpen] = useState(false);
   
   const getMainIdea = (text: string) => {
-    const stopWords = new Set(['i', 'am', 'the', 'a', 'an', 'and', 'but', 'if', 'or', 'as', 'what', 'which', 'this', 'that', 'these', 'those', 'then', 'just', 'so', 'for', 'with', 'in', 'on', 'at', 'by', 'today', 'was', 'were', 'is', 'it', 'my', 'me']);
+    const stopWords = new Set(['i', 'am', 'the', 'a', 'an', 'and', 'but', 'if', 'or', 'as', 'what', 'which', 'this', 'that', 'these', 'those', 'then', 'just', 'so', 'for', 'with', 'in', 'on', 'at', 'by', 'today', 'was', 'were', 'is', 'it', 'my', 'me', 'am', 'was', 'very', 'really', 'feel', 'feeling', 'grateful', 'thankful']);
     const words = text.trim().toLowerCase().split(/\s+/).map(w => w.replace(/[^a-z]/g, '')).filter(w => w.length > 2);
     const substantialWords = words.filter(w => !stopWords.has(w));
     
+    // Pick the first substantial word instead of the longest one, as it's often the primary subject/action
     if (substantialWords.length > 0) {
-      const main = substantialWords.sort((a, b) => b.length - a.length)[0];
+      const main = substantialWords[0];
       return main.charAt(0).toUpperCase() + main.slice(1);
     }
     return words.length > 0 ? words[0].charAt(0).toUpperCase() + words[0].slice(1) : "Reflect";
