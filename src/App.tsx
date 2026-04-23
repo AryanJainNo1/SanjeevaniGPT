@@ -480,6 +480,30 @@ export default function App() {
     } catch (e) { console.error(e); }
   };
 
+  const deleteConversation = async (id: string) => {
+    if (!user) return;
+    try {
+      await deleteDoc(doc(db, `users/${user.uid}/conversations`, id));
+      if (activeConversationId === id) {
+        setActiveConversationId(null);
+        setMessages([]);
+      }
+    } catch (e) { console.error(e); }
+  };
+
+  const clearAllHistory = async () => {
+    if (!user || !window.confirm("Are you sure you want to clear your entire conversation history? This cannot be undone.")) return;
+    try {
+      // Note: For simplicity in client-side, we delete the docs we have in state. 
+      // A more robust way would be a batch or cloud function.
+      for (const conv of conversations) {
+        await deleteDoc(doc(db, `users/${user.uid}/conversations`, conv.id));
+      }
+      setActiveConversationId(null);
+      setMessages([]);
+    } catch (e) { console.error(e); }
+  };
+
   const addGratitude = async (text: string) => {
     if (!user) return;
     
@@ -751,15 +775,30 @@ export default function App() {
 
           {activeTab === "chat" && conversations.length > 0 && (
             <div className="flex flex-col gap-2 ml-4 mb-2 border-l border-white/5 pl-3">
-              {conversations.slice(0, 5).map(conv => (
-                <button
-                  key={conv.id}
-                  onClick={() => selectConversation(conv.id)}
-                  className={`text-[10px] py-2 px-3 rounded-lg text-left truncate transition-all ${activeConversationId === conv.id ? 'bg-white/10 text-soft-white' : 'text-cool-light hover:text-soft-white hover:bg-white/5'}`}
-                >
-                  {conv.title}
-                </button>
+              {conversations.map(conv => (
+                <div key={conv.id} className="group flex items-center justify-between gap-1 pr-1">
+                  <button
+                    onClick={() => selectConversation(conv.id)}
+                    className={`text-[10px] py-2 px-3 rounded-lg text-left truncate flex-1 transition-all ${activeConversationId === conv.id ? 'bg-white/10 text-soft-white' : 'text-cool-light hover:text-soft-white hover:bg-white/5'}`}
+                  >
+                    {conv.title}
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); deleteConversation(conv.id); }}
+                    className="p-1 px-2 text-cool-light/30 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Delete Conversation"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
               ))}
+              
+              <button 
+                onClick={clearAllHistory}
+                className="mt-2 text-[9px] uppercase tracking-widest text-red-400/50 hover:text-red-400 font-bold py-1 px-3 border border-red-400/10 hover:border-red-400/30 rounded-lg transition-all text-center w-full"
+              >
+                Clear All History
+              </button>
             </div>
           )}
 
