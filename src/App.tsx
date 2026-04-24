@@ -41,6 +41,8 @@ import {
   GoogleAuthProvider,
   signOut, 
   updateProfile,
+  setPersistence,
+  browserSessionPersistence,
   User as FirebaseUser
 } from 'firebase/auth';
 import { 
@@ -339,16 +341,29 @@ export default function App() {
   };
 
   const handleGoogleLogin = async () => {
+    setAuthError("");
     const provider = new GoogleAuthProvider();
     try {
+      // Ensure persistence is set for the browser session
+      await setPersistence(auth, browserSessionPersistence);
       const res = await signInWithPopup(auth, provider);
+      
       // Ensure user profile exists in Firestore
       await setDoc(doc(db, "users", res.user.uid), {
         name: res.user.displayName || "User",
-        email: res.user.email
+        email: res.user.email,
+        lastLogin: new Date().toISOString()
       }, { merge: true });
     } catch (err: any) {
-      setAuthError(err.message || "Google Login failed");
+      console.error("Google Login Error:", err);
+      // Clean up common error messages for user readability
+      let message = err.message || "Google Login failed";
+      if (err.code === 'auth/popup-blocked') {
+        message = "Login popup was blocked by your browser. Please allow popups for this site.";
+      } else if (err.code === 'auth/operation-not-allowed') {
+        message = "Google Sign-In is not enabled in the Firebase console.";
+      }
+      setAuthError(message);
     }
   };
 
@@ -656,6 +671,16 @@ export default function App() {
           </div>
 
           <form onSubmit={handleAuth} className="space-y-6">
+            {authError && (
+              <motion.div 
+                initial={{ opacity: 0, x: -10 }} 
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-3 text-xs text-red-400 bg-red-400/10 p-4 rounded-xl border border-red-400/20 shadow-lg mb-6"
+              >
+                <AlertCircle size={16} className="shrink-0" /> {authError}
+              </motion.div>
+            )}
+
             {!isLoginView && (
               <div className="space-y-2">
                 <label className="text-[10px] uppercase tracking-widest text-cool-light font-bold ml-2">Your Name</label>
@@ -700,19 +725,9 @@ export default function App() {
               </div>
             </div>
 
-            {authError && (
-              <motion.div 
-                initial={{ opacity: 0, x: -10 }} 
-                animate={{ opacity: 1, x: 0 }}
-                className="flex items-center gap-2 text-xs text-red-400 bg-red-400/10 p-3 rounded-xl border border-red-400/20 shadow-lg"
-              >
-                <AlertCircle size={14} /> {authError}
-              </motion.div>
-            )}
-
             <button 
               type="submit"
-              className="w-full bg-gradient-to-r from-emerald to-indigo-elec text-soft-white py-4 rounded-2xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-emerald/10 border border-emerald/20 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-emerald to-indigo-elec text-soft-white py-4 rounded-2xl font-bold hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-emerald/10 border border-emerald/20 flex items-center justify-center gap-2 mt-4"
             >
               {isLoginView ? <LogIn size={18} /> : <UserPlus size={18} />}
               {isLoginView ? "Continue Securely" : "Create My Sanctuary"}
@@ -758,24 +773,24 @@ export default function App() {
   }
 
   return (
-    <div className="h-screen w-full flex flex-col md:flex-row p-0 md:p-6 gap-0 md:gap-6 overflow-hidden bg-obsidian relative">
+    <div className="h-screen h-[100dvh] w-full flex flex-col md:flex-row p-0 md:p-6 gap-0 md:gap-6 overflow-hidden bg-obsidian relative">
       {/* Ultimate Cinematic Background */}
-      <div className="fixed inset-0 pointer-events-none z-0">
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <motion.div 
           animate={{ 
-            scale: [1, 1.2, 1],
+            scale: [1, 1.1, 1],
             rotate: [0, 360],
           }}
-          transition={{ duration: 120, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(0,209,178,0.08)_0%,transparent_70%)] blur-[120px] -rotate-12"
+          transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(0,209,178,0.06)_0%,transparent_70%)] blur-[80px] md:blur-[120px] -rotate-12"
         />
         <motion.div 
           animate={{ 
-            scale: [1.2, 1, 1.2],
+            scale: [1.1, 1, 1.1],
             rotate: [360, 0],
           }}
-          transition={{ duration: 150, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-[-20%] right-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.08)_0%,transparent_70%)] blur-[120px] rotate-12"
+          transition={{ duration: 200, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-[-20%] right-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.06)_0%,transparent_70%)] blur-[80px] md:blur-[120px] rotate-12"
         />
         <div className="absolute top-1/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent -rotate-[15deg] transform origin-left" />
         <div className="absolute bottom-1/4 right-0 w-full h-[1px] bg-gradient-to-l from-transparent via-white/5 to-transparent rotate-[25deg] transform origin-right" />
@@ -828,26 +843,28 @@ export default function App() {
       <aside className={`fixed inset-y-0 left-0 w-72 luxury-glass flex flex-col p-6 shrink-0 z-40 transition-transform duration-300 md:relative md:translate-x-0 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:flex'}`}>
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald via-indigo-elec to-violet opacity-50" />
         
-        <div className="mb-8 text-center px-4">
-          <div className="mb-6 relative group inline-block">
-            <div className="absolute inset-0 bg-emerald/20 blur-2xl rounded-full scale-150 animate-pulse" />
-            <img 
-              src="/SGPT_logo.jpg" 
-              alt="Sanjeevani Logo" 
-              className="w-20 h-20 mx-auto rounded-3xl object-cover relative z-10 shadow-2xl border border-white/10 group-hover:scale-110 transition-transform duration-500"
-              referrerPolicy="no-referrer"
-            />
-            <div className="absolute -bottom-2 -right-2 bg-obsidian p-1.5 rounded-full border border-emerald/50 z-20 shadow-lg">
-              <Heart size={12} className="text-emerald fill-emerald animate-pulse" />
+          <div className="mb-4 text-center px-4">
+            <div className="mb-4 relative group inline-block">
+              <div className="absolute inset-0 bg-emerald/20 blur-2xl rounded-full scale-150 animate-pulse" />
+              <img 
+                src="/SGPT_logo.jpg" 
+                alt="Sanjeevani Logo" 
+                className="w-16 h-16 mx-auto rounded-2xl object-cover relative z-10 shadow-2xl border border-white/10 group-hover:scale-110 transition-transform duration-500"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute -bottom-1 -right-1 bg-obsidian p-1 rounded-full border border-emerald/50 z-20 shadow-lg">
+                <Heart size={10} className="text-emerald fill-emerald animate-pulse" />
+              </div>
+            </div>
+            <div className="scale-90 -my-4">
+              <SoulPrint evi={evi} color={atmosphericColor} />
+            </div>
+            <h2 className="text-lg font-bold text-soft-white font-serif tracking-tight mt-1 -skew-x-2">Sanjeevani <span className="text-emerald italic">GPT</span></h2>
+            <div className="mt-1 flex items-center justify-center gap-2 -rotate-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse accent-glow" />
+              <p className="text-[9px] font-bold text-cool-light tracking-widest uppercase italic">EVI: {evi}%</p>
             </div>
           </div>
-          <SoulPrint evi={evi} color={atmosphericColor} />
-          <h2 className="text-xl font-bold text-soft-white font-serif tracking-tight mt-4 -skew-x-2">Sanjeevani <span className="text-emerald italic">GPT</span></h2>
-          <div className="mt-2 flex items-center justify-center gap-2 -rotate-1">
-            <div className="w-2 h-2 rounded-full bg-emerald animate-pulse accent-glow" />
-            <p className="text-[10px] font-bold text-cool-light tracking-widest uppercase italic">Emotional Vitality Index: {evi}%</p>
-          </div>
-        </div>
 
         <div className="absolute top-48 -left-12 w-32 h-64 bg-emerald/5 -rotate-[35deg] blur-3xl pointer-events-none" />
         <div className="absolute bottom-20 -right-12 w-32 h-64 bg-violet/5 rotate-[45deg] blur-3xl pointer-events-none" />
@@ -958,29 +975,29 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col gap-6 overflow-hidden relative">
         {/* Header - Hidden on mobile except for central context */}
-        <header className={`${activeTab === 'chat' ? 'flex' : 'hidden md:flex'} luxury-glass h-20 px-8 items-center justify-between shrink-0 shadow-xl z-20`}>
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className={`w-3 h-3 rounded-full border-2 border-graphite absolute bottom-0 right-0 z-10 accent-glow ${activeTab === 'chat' ? 'bg-emerald' : activeTab === 'journal' ? 'bg-indigo-elec' : activeTab === 'breath' ? 'bg-violet' : 'bg-champagne'}`}></div>
-              <div className="w-10 h-10 rounded-full bg-graphite border border-slate-steel flex items-center justify-center font-bold text-emerald shadow-sm overflow-hidden">
+        <header className={`${activeTab === 'chat' ? 'flex' : 'hidden md:flex'} luxury-glass h-16 md:h-20 px-4 md:px-8 items-center justify-between shrink-0 shadow-xl z-20`}>
+          <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+            <div className="relative shrink-0">
+              <div className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border-2 border-graphite absolute bottom-0 right-0 z-10 accent-glow ${activeTab === 'chat' ? 'bg-emerald' : activeTab === 'journal' ? 'bg-indigo-elec' : activeTab === 'breath' ? 'bg-violet' : 'bg-champagne'}`}></div>
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-graphite border border-slate-steel flex items-center justify-center font-bold text-emerald shadow-sm overflow-hidden">
                 <span className={`bg-gradient-to-br bg-clip-text text-transparent ${activeTab === 'chat' ? 'from-emerald to-violet' : 'from-indigo-elec to-champagne'}`}>
                   {activeTab === 'chat' ? 'S' : activeTab.charAt(0).toUpperCase()}
                 </span>
               </div>
             </div>
-            <div>
-              <h1 className="text-sm font-bold text-soft-white tracking-wide -skew-x-2">
+            <div className="min-w-0">
+              <h1 className="text-xs md:text-sm font-bold text-soft-white tracking-wide -skew-x-2 truncate">
                 {activeTab === 'chat' ? 'Sanjeevani Empathy Engine' : activeTab === 'journal' ? 'Reflective Journal' : activeTab === 'breath' ? 'Harmonized Breath' : 'Gratitude Sanctuary'}
               </h1>
-              <p className="text-[10px] text-cool-light font-medium uppercase tracking-tighter">Private session for <span className="text-emerald">{user.name}</span></p>
+              <p className="text-[8px] md:text-[10px] text-cool-light font-medium uppercase tracking-tighter truncate">Private session for <span className="text-emerald">{user.name}</span></p>
             </div>
           </div>
-          <div className="flex gap-3 items-center">
+          <div className="flex gap-2 md:gap-3 items-center shrink-0">
             <div 
               style={{ color: atmosphericColor, border: `1px solid ${atmosphericColor}22` }}
-              className="px-3 py-1.5 luxury-card rounded-full text-[10px] font-bold tracking-wider uppercase flex items-center gap-2"
+              className="px-2 md:px-3 py-1 md:py-1.5 luxury-card rounded-full text-[8px] md:text-[10px] font-bold tracking-wider uppercase flex items-center gap-1.5 md:gap-2 whitespace-nowrap"
             >
-              <Heart size={12} className="animate-pulse" /> Resonating with {user.name}
+              <Heart size={10} className="animate-pulse md:w-[12px] md:h-[12px]" /> <span className="hidden xs:inline">Resonating</span>
             </div>
             {activeTab === 'chat' && (
               <button 
@@ -1051,7 +1068,7 @@ export default function App() {
         </div>
 
         {/* Mobile Bottom Navigation */}
-        <div className="md:hidden flex items-center justify-around p-3 pb-8 luxury-glass z-30 border-t border-white/5 bg-obsidian">
+        <div className="md:hidden flex items-center justify-around p-3 luxury-glass z-30 border-t border-white/5 bg-obsidian safe-bottom">
           {[
             { id: 'chat', icon: MessageCircle },
             { id: 'journal', icon: BookOpen },
@@ -1061,9 +1078,9 @@ export default function App() {
             <button 
               key={item.id}
               onClick={() => { setActiveTab(item.id as Tab); setIsMobileMenuOpen(false); }}
-              className={`p-2 rounded-full transition-all ${activeTab === item.id ? 'bg-emerald/20 text-emerald scale-110' : 'text-cool-light hover:text-soft-white'}`}
+              className={`p-2.5 rounded-full transition-all ${activeTab === item.id ? 'bg-emerald/20 text-emerald scale-110' : 'text-cool-light hover:text-soft-white'}`}
             >
-              <item.icon size={24} />
+              <item.icon size={22} />
             </button>
           ))}
         </div>
@@ -1168,22 +1185,21 @@ function SoulPrint({ evi, color }: { evi: number, color: string }) {
       ctx.arc(centerX, centerY, 75, 0, Math.PI * 2);
       ctx.fill();
 
-      for (let layer = 0; layer < 6; layer++) {
+      for (let layer = 0; layer < 4; layer++) {
         ctx.beginPath();
-        const opacity = Math.max(0.08, 0.45 - layer * 0.07);
+        const opacity = Math.max(0.1, 0.4 - layer * 0.08);
         ctx.strokeStyle = `${color}${Math.floor(opacity * 255).toString(16).padStart(2, '0')}`;
-        ctx.lineWidth = 1.6 - layer * 0.22;
+        ctx.lineWidth = 1.4 - layer * 0.25;
         ctx.lineCap = 'round';
-        ctx.shadowBlur = 15;
+        ctx.shadowBlur = 10;
         ctx.shadowColor = color;
         
-        for (let angle = 0; angle < Math.PI * 2; angle += 0.015) {
-          const frequency = 2 + layer * 0.5;
-          const amplitude = (10 + layer * 3) * (evi / 100);
+        for (let angle = 0; angle < Math.PI * 2; angle += 0.02) {
+          const frequency = 2 + layer * 0.6;
+          const amplitude = (8 + layer * 2) * (evi / 100);
           
-          const noise = Math.sin(angle * frequency + time * (0.8 + layer * 0.15)) * amplitude +
-                        Math.cos(angle * (frequency + 2.5) - time * 0.6) * (amplitude / 1.8) +
-                        Math.sin(angle * 12 + time * 2) * (amplitude / 6);
+          const noise = Math.sin(angle * frequency + time * (0.6 + layer * 0.1)) * amplitude +
+                        Math.cos(angle * (frequency + 2) - time * 0.5) * (amplitude / 2);
           
           const r = baseRadius + noise;
           const x = centerX + Math.cos(angle) * r;
@@ -1291,21 +1307,22 @@ function ChatView({ messages, scrollRef, isLoading, input, setInput, handleSend,
         )}
       </div>
 
-      <div className="mt-6 flex gap-3 overflow-x-auto pb-2 scrollbar-none px-4">
+      <div className="mt-2 md:mt-6 flex gap-3 overflow-x-auto pb-2 no-scrollbar px-4">
         {["Can you suggest a quick breathing exercise?", "I'm struggling with a thought, help me reframe it.", "How can I handle overwhelm today?"].map((suggestion) => (
           <button 
             key={suggestion}
             onClick={() => setInput(suggestion)}
-            className="text-[10px] font-bold px-4 py-2 luxury-card rounded-full text-cool-light hover:text-emerald hover:border-emerald/30 transition-all whitespace-nowrap tracking-widest uppercase border-slate-steel/50"
+            className="text-[9px] md:text-[10px] font-bold px-3 md:px-4 py-1.5 md:py-2 luxury-card rounded-full text-cool-light hover:text-emerald hover:border-emerald/30 transition-all whitespace-nowrap tracking-widest uppercase border-slate-steel/50"
           >
             {suggestion.split(' ').slice(0, 3).join(' ')}...
           </button>
         ))}
       </div>
 
-      <div className="mt-6 pt-6 border-t border-slate-steel/50 px-4">
+      <div className="mt-2 md:mt-6 pt-2 md:pt-6 border-t border-slate-steel/50 px-4 mb-2">
         <div className="relative flex items-center group">
           <textarea 
+            rows={1}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
@@ -1316,7 +1333,6 @@ function ChatView({ messages, scrollRef, isLoading, input, setInput, handleSend,
             }}
             placeholder="Whisper your thoughts..." 
             className="w-full bg-graphite/40 border border-slate-steel/50 rounded-2xl py-4 px-6 pr-14 text-sm focus:outline-none focus:ring-1 focus:ring-emerald/30 text-soft-white resize-none min-h-[60px] max-h-32"
-            rows={1}
           />
           <button 
             onClick={() => handleSend(input)}
@@ -1367,15 +1383,15 @@ function JournalView({ moodHistory, addMood, deleteMood, ai }: any) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="h-full flex flex-col p-8 luxury-glass overflow-hidden shadow-2xl"
+      className="h-full flex flex-col p-4 md:p-8 luxury-glass overflow-hidden shadow-2xl"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 h-full overflow-hidden">
-        <div className="lg:col-span-3 flex flex-col gap-6 overflow-y-auto md:overflow-hidden pb-4 md:pb-0">
-          <div className="luxury-card p-8 rounded-3xl space-y-6 relative overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-8 h-full overflow-hidden">
+        <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6 overflow-y-auto md:overflow-hidden pb-4 md:pb-0">
+          <div className="luxury-card p-5 md:p-8 rounded-3xl space-y-4 md:space-y-6 relative overflow-hidden shrink-0">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald/5 blur-3xl -rotate-12 pointer-events-none" />
-            <div className="flex justify-between items-center relative z-10">
-              <h3 className="text-soft-white font-bold flex items-center gap-2 italic -skew-x-2">
-                <Sparkles size={16} className="text-emerald animate-pulse" /> {prompt}
+            <div className="flex justify-between items-start gap-2 relative z-10">
+              <h3 className="text-xs md:text-sm text-soft-white font-bold flex items-center gap-2 italic -skew-x-2 leading-tight">
+                <Sparkles size={14} className="text-emerald animate-pulse shrink-0" /> {prompt}
               </h3>
               <button 
                 onClick={generatePrompt}
@@ -1698,13 +1714,13 @@ function GratitudeView({ list, addGratitude, deleteGratitude }: any) {
       <div className="absolute inset-0 bg-[radial-gradient(#ffffff05_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
 
       <div className="max-w-[1300px] mx-auto w-full flex flex-col h-full relative z-10">
-        <div className="text-center mb-10 space-y-2 -skew-x-2">
-          <h3 className="text-4xl font-serif font-bold text-soft-white tracking-tight">The Wall of <span className="italic text-champagne">Gratitude</span></h3>
-          <p className="text-cool-light text-[10px] uppercase font-bold tracking-[0.2em] opacity-70">A collective of light, one note at a time.</p>
+        <div className="text-center mb-6 md:mb-10 space-y-2 -skew-x-2">
+          <h3 className="text-2xl md:text-4xl font-serif font-bold text-soft-white tracking-tight">The Wall of <span className="italic text-champagne">Gratitude</span></h3>
+          <p className="text-cool-light text-[8px] md:text-[10px] uppercase font-bold tracking-[0.2em] opacity-70 px-4">A collective of light, one note at a time.</p>
         </div>
 
         {/* Input Bar */}
-        <div className="max-w-xl mx-auto w-full mb-12">
+        <div className="max-w-xl mx-auto w-full mb-8 md:mb-12 px-4">
           <div className="relative group">
             <input 
               type="text"
@@ -1712,13 +1728,13 @@ function GratitudeView({ list, addGratitude, deleteGratitude }: any) {
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
               placeholder="What are you thankful for?"
-              className="w-full bg-graphite/40 border border-slate-steel/50 rounded-2xl py-5 px-6 pr-16 text-lg focus:outline-none focus:border-champagne/50 italic text-soft-white shadow-xl backdrop-blur-md"
+              className="w-full bg-graphite/40 border border-slate-steel/50 rounded-xl md:rounded-2xl py-3 md:py-5 px-5 md:px-6 pr-14 md:pr-16 text-base md:text-lg focus:outline-none focus:border-champagne/50 italic text-soft-white shadow-xl backdrop-blur-md"
             />
             <button 
               onClick={handleSave}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-champagne text-obsidian rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl"
+              className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-champagne text-obsidian rounded-lg md:rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl"
             >
-              <Plus size={20} />
+              <Plus size={18} />
             </button>
           </div>
         </div>

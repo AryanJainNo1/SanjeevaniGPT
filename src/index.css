@@ -29,20 +29,34 @@
 
 @layer base {
   body {
-    @apply antialiased text-soft-white bg-obsidian selection:bg-white/10 transition-colors duration-1000 overflow-hidden;
+    @apply antialiased text-soft-white bg-obsidian selection:bg-white/10 transition-colors duration-1000 overflow-hidden touch-none;
     min-height: 100vh;
+    min-height: 100dvh;
     cursor: default;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0.5rem);
   }
 }
 
 @layer components {
   .luxury-glass {
-    @apply bg-white/[0.01] backdrop-blur-[40px] border border-white/[0.08] rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)];
+    @apply bg-white/[0.01] backdrop-blur-[20px] md:backdrop-blur-[40px] border border-white/[0.08] rounded-[1.5rem] md:rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)];
     transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .luxury-card {
-    @apply bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] rounded-3xl shadow-xl;
+    @apply bg-white/[0.02] backdrop-blur-xl md:backdrop-blur-2xl border border-white/[0.05] rounded-2xl md:rounded-3xl shadow-xl;
     transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
