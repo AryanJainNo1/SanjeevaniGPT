@@ -837,9 +837,12 @@ export default function App() {
               <SoulPrint evi={evi} color={atmosphericColor} />
             </div>
             <h2 className="text-lg font-bold text-soft-white font-serif tracking-tight mt-1 -skew-x-2">Sanjeevani <span className="text-sage italic">Sense</span></h2>
-            <div className="mt-1 flex items-center justify-center gap-2">
+            <div className="mt-1 flex items-center justify-center gap-2 group/score relative cursor-help">
               <div className="w-1.5 h-1.5 rounded-full bg-sage animate-pulse accent-glow" />
-              <p className="text-[9px] font-bold text-cool-light tracking-widest uppercase italic">Resonating: {evi}%</p>
+              <p className="text-[9px] font-bold text-cool-light tracking-widest uppercase italic">Inner Peace: {evi}%</p>
+              <div className="absolute top-full mt-1 left-1/2 -translate-x-1/2 w-32 luxury-card p-2 text-[8px] leading-tight text-soft-white/70 opacity-0 group-hover/score:opacity-100 transition-opacity z-50 pointer-events-none text-center">
+                A measure of your current emotional clarity and zen.
+              </div>
             </div>
           </div>
 
@@ -974,7 +977,7 @@ export default function App() {
               style={{ color: atmosphericColor, border: `1px solid ${atmosphericColor}22` }}
               className="px-2 md:px-3 py-1 md:py-1.5 luxury-card rounded-full text-[8px] md:text-[10px] font-bold tracking-wider uppercase flex items-center gap-1.5 md:gap-2 whitespace-nowrap"
             >
-              <Heart size={10} className="animate-pulse md:w-[12px] md:h-[12px]" /> <span className="hidden xs:inline">Resonating</span>
+              <Heart size={10} className="animate-pulse md:w-[12px] md:h-[12px]" /> <span className="hidden xs:inline">Harmony Sync</span>
             </div>
             {activeTab === 'chat' && (
               <button 
@@ -1194,7 +1197,7 @@ const SoulPrint = React.memo(({ evi, color }: { evi: number, color: string }) =>
     <div className="relative group flex items-center justify-center -mb-4 -mt-4">
       <div className="absolute inset-0 bg-white/5 blur-3xl rounded-full scale-110 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none" />
       <canvas ref={canvasRef} className="w-40 h-40 drop-shadow-[0_0_25px_rgba(0,0,0,0.05)] relative z-10" />
-      <div className="absolute inset-x-0 bottom-6 text-[8px] font-mono text-soft-white/10 select-none pointer-events-none tracking-[0.5em] uppercase">Vibrancy</div>
+      <div className="absolute inset-x-0 bottom-6 text-[8px] font-mono text-soft-white/10 select-none pointer-events-none tracking-[0.5em] uppercase">Balance</div>
     </div>
   );
 });
@@ -1812,7 +1815,7 @@ function GratitudeNote({ item, deleteGratitude }: { item: any, deleteGratitude: 
         onClick={(e) => { e.stopPropagation(); deleteGratitude(item.id); }}
         className="absolute top-1 right-1 opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-2 md:p-1 z-20"
       >
-        <Trash2 size={12} md:size={10} />
+        <Trash2 size={12} />
       </button>
 
       {/* Sticky Tape Effect at Top */}
