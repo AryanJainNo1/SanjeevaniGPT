@@ -1402,7 +1402,7 @@ const JournalView = React.memo(({ moodHistory, addMood, deleteMood, ai }: any) =
       className="h-full flex flex-col p-4 md:p-8 luxury-glass overflow-hidden shadow-2xl"
     >
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 h-full overflow-hidden">
-        <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6 overflow-y-auto md:overflow-hidden pb-4 md:pb-0 scrollbar-none">
+        <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6 overflow-y-auto md:overflow-hidden pb-32 md:pb-0 scrollbar-none">
           <div className="luxury-card p-5 md:p-8 rounded-3xl space-y-5 md:space-y-6 relative overflow-hidden shrink-0">
             <div className="absolute top-0 right-0 w-32 h-32 bg-sage/5 blur-3xl -rotate-12 pointer-events-none" />
             <div className="flex justify-between items-start gap-3 relative z-10">
@@ -1601,14 +1601,20 @@ const BreathView = React.memo(() => {
         className="absolute inset-0 bg-gradient-to-tr from-sage/20 via-mint/10 to-violet/20 blur-[80px] md:blur-[120px] pointer-events-none"
       />
 
-      <div className="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center relative z-10 overflow-y-auto no-scrollbar pt-12 pb-32 md:py-0">
-        <div className="flex flex-col gap-6 md:gap-8 order-2 lg:order-1 px-1 md:px-0">
-          <div className="space-y-1.5 md:space-y-2 -skew-x-2 text-center lg:text-left">
+      <div className="max-w-4xl w-full max-h-full grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 items-start lg:items-center relative z-10 overflow-y-auto no-scrollbar pt-0 md:pt-4 pb-40 lg:py-0">
+        <div className="flex flex-col gap-3 md:gap-6 order-2 lg:order-1 px-1 md:px-0">
+          <div className="space-y-1 md:space-y-2 -skew-x-2 text-center lg:text-left">
             <h3 className="text-2xl md:text-4xl font-serif font-bold text-soft-white select-none">Breathe with <span className="italic text-sage">Me</span></h3>
             <p className="text-cool-light text-[9px] md:text-xs font-bold tracking-[0.25em] uppercase opacity-60">Harmonize Your Presence</p>
           </div>
 
-          <div className="space-y-3 md:space-y-4">
+          <div className="space-y-2 md:space-y-4">
+            <div className="flex items-center justify-center lg:justify-start gap-3 opacity-40 mb-1 mt-1">
+              <div className="h-px bg-soft-white flex-1 max-w-[20px] lg:hidden" />
+              <p className="text-[8px] md:text-[9px] uppercase tracking-[0.25em] font-bold text-cool-light">Scroll to explore techniques</p>
+              <div className="h-px bg-soft-white flex-1 max-w-[20px]" />
+            </div>
+
             {techniques.map((tech, idx) => (
               <button 
                 key={idx}
@@ -1641,7 +1647,7 @@ const BreathView = React.memo(() => {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center order-1 lg:order-2 py-4">
+        <div className="flex flex-col items-center justify-center order-1 lg:order-2 py-0 md:py-4">
           <div className="relative flex items-center justify-center scale-90 md:scale-100">
             <motion.div 
               animate={{ 
@@ -1649,7 +1655,7 @@ const BreathView = React.memo(() => {
                 opacity: phase === "Inhale" ? [0.2, 0.4] : phase === "Exhale" ? [0.4, 0.2] : 0.4
               }}
               transition={{ duration: duration, ease: "easeInOut" }}
-              className="w-44 h-44 md:w-72 md:h-72 bg-sage/10 rounded-full blur-2xl md:blur-3xl absolute"
+              className="w-44 h-44 md:w-60 md:h-60 bg-sage/10 rounded-full blur-2xl md:blur-3xl absolute"
             />
             
             <motion.div 
@@ -1658,7 +1664,7 @@ const BreathView = React.memo(() => {
                 borderColor: phase === "Inhale" ? "#94A684" : phase === "Exhale" ? "#818CF8" : phase === "Hold" ? "#DCD7C9" : "#F9FAFB"
               }}
               transition={{ duration: duration, ease: "easeInOut" }}
-              className="w-52 h-52 md:w-80 md:h-80 border-2 rounded-full flex flex-col items-center justify-center relative z-20 backdrop-blur-sm bg-white/5 shadow-2xl"
+              className="w-52 h-52 md:w-64 md:h-64 border-2 rounded-full flex flex-col items-center justify-center relative z-20 backdrop-blur-sm bg-white/5 shadow-2xl"
             >
               <AnimatePresence mode="wait">
                 <motion.div 
