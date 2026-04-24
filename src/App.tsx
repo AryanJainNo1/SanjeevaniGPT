@@ -782,7 +782,7 @@ export default function App() {
             rotate: [0, 360],
           }}
           transition={{ duration: 180, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(0,209,178,0.06)_0%,transparent_70%)] blur-[80px] md:blur-[120px] -rotate-12"
+          className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(0,209,178,0.06)_0%,transparent_70%)] blur-[60px] md:blur-[120px] -rotate-12"
         />
         <motion.div 
           animate={{ 
@@ -790,7 +790,7 @@ export default function App() {
             rotate: [360, 0],
           }}
           transition={{ duration: 200, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-[-20%] right-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.06)_0%,transparent_70%)] blur-[80px] md:blur-[120px] rotate-12"
+          className="absolute bottom-[-20%] right-[-20%] w-[140%] h-[140%] bg-[radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.06)_0%,transparent_70%)] blur-[60px] md:blur-[120px] rotate-12"
         />
         <div className="absolute top-1/4 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/5 to-transparent -rotate-[15deg] transform origin-left" />
         <div className="absolute bottom-1/4 right-0 w-full h-[1px] bg-gradient-to-l from-transparent via-white/5 to-transparent rotate-[25deg] transform origin-right" />
@@ -1259,18 +1259,18 @@ function ChatView({ messages, scrollRef, isLoading, input, setInput, handleSend,
               className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div 
-                className={`max-w-[85%] md:max-w-xl p-6 shadow-xl relative group transition-all duration-500 ${
+                className={`max-w-[90%] md:max-w-xl p-4 md:p-6 shadow-xl relative group transition-all duration-500 ${
                   message.role === "user" 
-                    ? "chat-bubble-user-luxury text-soft-white rounded-[2.5rem] rounded-tr-none" 
-                    : "chat-bubble-bot-luxury text-soft-white/90 font-serif text-lg leading-relaxed rounded-[2.5rem] rounded-tl-none hover:bg-white/[0.05]"
+                    ? "chat-bubble-user-luxury text-soft-white rounded-2xl md:rounded-[2.5rem] rounded-tr-none" 
+                    : "chat-bubble-bot-luxury text-soft-white/90 font-serif text-base md:text-lg leading-relaxed rounded-2xl md:rounded-[2.5rem] rounded-tl-none hover:bg-white/[0.05]"
                 }`}
               >
                 {message.role === "model" && (
-                  <div className="absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
-                    <div className="w-4 h-4 rounded-full bg-emerald/20 blur-md animate-pulse" />
+                  <div className="absolute -left-6 md:-left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-40 transition-opacity pointer-events-none">
+                    <div className="w-3 md:w-4 h-3 md:h-4 rounded-full bg-emerald/20 blur-md animate-pulse" />
                   </div>
                 )}
-                <div className="markdown-body">
+                <div className="markdown-body text-sm md:text-base">
                   <ReactMarkdown>{message.text}</ReactMarkdown>
                 </div>
                 <div className={`mt-4 text-[10px] opacity-20 flex items-center gap-2 font-mono tracking-tighter ${message.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -1331,8 +1331,8 @@ function ChatView({ messages, scrollRef, isLoading, input, setInput, handleSend,
                 if (input.trim()) handleSend(input);
               }
             }}
-            placeholder="Whisper your thoughts..." 
-            className="w-full bg-graphite/40 border border-slate-steel/50 rounded-2xl py-4 px-6 pr-14 text-sm focus:outline-none focus:ring-1 focus:ring-emerald/30 text-soft-white resize-none min-h-[60px] max-h-32"
+            placeholder="Whisper..." 
+            className="w-full bg-graphite/40 border border-slate-steel/50 rounded-xl md:rounded-2xl py-3 md:py-4 px-4 md:px-6 pr-12 md:pr-14 text-xs md:text-sm focus:outline-none focus:ring-1 focus:ring-emerald/30 text-soft-white resize-none min-h-[50px] md:min-h-[60px] max-h-32"
           />
           <button 
             onClick={() => handleSend(input)}
