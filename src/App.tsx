@@ -1401,24 +1401,24 @@ const JournalView = React.memo(({ moodHistory, addMood, deleteMood, ai }: any) =
       exit={{ opacity: 0, x: -20 }}
       className="h-full flex flex-col p-4 md:p-8 luxury-glass overflow-hidden shadow-2xl"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-8 h-full overflow-hidden">
-        <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6 overflow-y-auto md:overflow-hidden pb-4 md:pb-0">
-          <div className="luxury-card p-5 md:p-8 rounded-3xl space-y-4 md:space-y-6 relative overflow-hidden shrink-0">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 h-full overflow-hidden">
+        <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6 overflow-y-auto md:overflow-hidden pb-4 md:pb-0 scrollbar-none">
+          <div className="luxury-card p-5 md:p-8 rounded-3xl space-y-5 md:space-y-6 relative overflow-hidden shrink-0">
             <div className="absolute top-0 right-0 w-32 h-32 bg-sage/5 blur-3xl -rotate-12 pointer-events-none" />
-            <div className="flex justify-between items-start gap-2 relative z-10">
-              <h3 className="text-xs md:text-sm text-soft-white font-bold flex items-center gap-2 italic -skew-x-2 leading-tight">
+            <div className="flex justify-between items-start gap-3 relative z-10">
+              <h3 className="text-xs md:text-sm text-soft-white font-bold flex items-center gap-2 italic -skew-x-2 leading-relaxed">
                 <Sparkles size={14} className="text-sage animate-pulse shrink-0" /> {prompt}
               </h3>
               <button 
                 onClick={generatePrompt}
                 disabled={isGenerating}
-                className="p-2 hover:bg-sage/10 rounded-lg text-sage transition-all"
+                className="p-2.5 hover:bg-sage/10 rounded-xl text-sage transition-all bg-white/5 active:scale-90"
               >
                 <RefreshCw size={14} className={isGenerating ? "animate-spin" : ""} />
               </button>
             </div>
             
-            <div className="flex justify-between gap-2">
+            <div className="grid grid-cols-5 gap-2">
               {[
                 { val: 1, icon: Frown, color: "text-red-400", label: "Rough" },
                 { val: 2, icon: Frown, color: "text-orange-400", label: "Low" },
@@ -1429,10 +1429,10 @@ const JournalView = React.memo(({ moodHistory, addMood, deleteMood, ai }: any) =
                 <button 
                   key={m.val}
                   onClick={() => setMood(m.val)}
-                  className={`flex-1 p-3 rounded-2xl border transition-all flex flex-col items-center gap-1 ${mood === m.val ? 'bg-sage/10 border-sage shadow-lg shadow-sage/10 scale-105' : 'bg-graphite/40 border-slate-steel hover:border-sage/30'}`}
+                  className={`p-2.5 md:p-3 rounded-2xl border transition-all flex flex-col items-center gap-1.5 ${mood === m.val ? 'bg-sage/10 border-sage shadow-lg shadow-sage/10 scale-[1.02]' : 'bg-graphite/40 border-slate-steel hover:border-sage/30'}`}
                 >
-                  <m.icon size={20} className={mood === m.val ? m.color : "text-cool-light"} />
-                  <span className="text-[10px] font-bold text-cool-light">{m.label}</span>
+                  <m.icon size={22} className={mood === m.val ? m.color : "text-cool-light/60"} />
+                  <span className="text-[9px] md:text-[10px] font-bold text-cool-light hidden xs:block">{m.label}</span>
                 </button>
               ))}
             </div>
@@ -1453,13 +1453,13 @@ const JournalView = React.memo(({ moodHistory, addMood, deleteMood, ai }: any) =
           </div>
         </div>
 
-        <div className="lg:col-span-2 flex flex-col gap-4 overflow-hidden mb-12 lg:mb-0">
-          <h4 className="text-[10px] uppercase tracking-[0.2em] text-cool-light font-bold flex items-center gap-2">
+        <div className="lg:col-span-2 flex flex-col gap-4 overflow-hidden mb-16 lg:mb-0">
+          <h4 className="text-[10px] uppercase tracking-[0.2em] text-cool-light font-bold flex items-center gap-2 px-1">
             <History size={12} /> Recent Reflections
           </h4>
-          <div className="flex-1 overflow-y-auto space-y-4 pr-2 scrollbar-thin">
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-none pb-24 md:pb-0">
             {moodHistory.length === 0 && (
-              <div className="p-8 text-center text-cool-light/50 text-sm italic">No entries yet. Start reflecting...</div>
+              <div className="p-12 text-center text-cool-light/50 text-sm italic luxury-card rounded-3xl border-dashed">No entries yet. Start reflecting...</div>
             )}
             {moodHistory.map((entry: any) => {
               const moodColors: Record<number, string> = {
@@ -1589,7 +1589,7 @@ const BreathView = React.memo(() => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="h-full flex items-center justify-center p-4 md:p-8 luxury-glass relative overflow-hidden"
+      className="h-full flex items-start justify-center md:items-center p-2 md:p-8 luxury-glass relative overflow-hidden"
     >
       {/* Abstract Background Animation */}
       <motion.div 
@@ -1601,11 +1601,11 @@ const BreathView = React.memo(() => {
         className="absolute inset-0 bg-gradient-to-tr from-sage/20 via-mint/10 to-violet/20 blur-[80px] md:blur-[120px] pointer-events-none"
       />
 
-      <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center relative z-10 overflow-y-auto no-scrollbar py-4 md:py-0">
-        <div className="flex flex-col gap-6 md:gap-8 order-2 md:order-1 px-2 md:px-0">
-          <div className="space-y-1 md:space-y-2 -skew-x-2 text-center md:text-left">
-            <h3 className="text-2xl md:text-3xl font-serif font-bold text-soft-white select-none">Breathe with <span className="italic text-sage">Me</span></h3>
-            <p className="text-cool-light text-[10px] md:text-xs font-bold tracking-widest uppercase opacity-60">Harmonize Your Presence</p>
+      <div className="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16 items-center relative z-10 overflow-y-auto no-scrollbar pt-12 pb-32 md:py-0">
+        <div className="flex flex-col gap-6 md:gap-8 order-2 lg:order-1 px-1 md:px-0">
+          <div className="space-y-1.5 md:space-y-2 -skew-x-2 text-center lg:text-left">
+            <h3 className="text-2xl md:text-4xl font-serif font-bold text-soft-white select-none">Breathe with <span className="italic text-sage">Me</span></h3>
+            <p className="text-cool-light text-[9px] md:text-xs font-bold tracking-[0.25em] uppercase opacity-60">Harmonize Your Presence</p>
           </div>
 
           <div className="space-y-3 md:space-y-4">
@@ -1641,7 +1641,7 @@ const BreathView = React.memo(() => {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center order-1 md:order-2 py-4">
+        <div className="flex flex-col items-center justify-center order-1 lg:order-2 py-4">
           <div className="relative flex items-center justify-center scale-90 md:scale-100">
             <motion.div 
               animate={{ 
@@ -1649,7 +1649,7 @@ const BreathView = React.memo(() => {
                 opacity: phase === "Inhale" ? [0.2, 0.4] : phase === "Exhale" ? [0.4, 0.2] : 0.4
               }}
               transition={{ duration: duration, ease: "easeInOut" }}
-              className="w-56 h-56 md:w-72 md:h-72 bg-sage/10 rounded-full blur-2xl md:blur-3xl absolute"
+              className="w-44 h-44 md:w-72 md:h-72 bg-sage/10 rounded-full blur-2xl md:blur-3xl absolute"
             />
             
             <motion.div 
@@ -1658,7 +1658,7 @@ const BreathView = React.memo(() => {
                 borderColor: phase === "Inhale" ? "#94A684" : phase === "Exhale" ? "#818CF8" : phase === "Hold" ? "#DCD7C9" : "#F9FAFB"
               }}
               transition={{ duration: duration, ease: "easeInOut" }}
-              className="w-64 h-64 md:w-80 md:h-80 border-2 rounded-full flex flex-col items-center justify-center relative z-20 backdrop-blur-sm bg-white/5 shadow-2xl"
+              className="w-52 h-52 md:w-80 md:h-80 border-2 rounded-full flex flex-col items-center justify-center relative z-20 backdrop-blur-sm bg-white/5 shadow-2xl"
             >
               <AnimatePresence mode="wait">
                 <motion.div 
@@ -1666,11 +1666,11 @@ const BreathView = React.memo(() => {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  className="text-center"
+                  className="text-center px-4"
                 >
-                  <h4 className="text-4xl font-serif font-bold text-soft-white mb-2">{phase}</h4>
-                  <div className="text-[10px] uppercase tracking-[0.3em] font-bold text-cool-light flex items-center justify-center gap-2">
-                    <History size={10} className="animate-spin-slow" /> {duration} Seconds
+                  <h4 className="text-2xl md:text-4xl font-serif font-bold text-soft-white mb-1 md:mb-2">{phase}</h4>
+                  <div className="text-[8px] md:text-[10px] uppercase tracking-[0.3em] font-bold text-cool-light flex items-center justify-center gap-1.5 md:gap-2">
+                    <History size={10} className="animate-spin-slow" /> {duration}s
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -1739,7 +1739,7 @@ const GratitudeView = React.memo(({ list, addGratitude, deleteGratitude }: any) 
         </div>
 
         {/* Input Bar */}
-        <div className="max-w-xl mx-auto w-full mb-8 md:mb-12 px-4">
+        <div className="max-w-xl mx-auto w-full mb-10 md:mb-12 px-2">
           <div className="relative group">
             <input 
               type="text"
@@ -1747,20 +1747,20 @@ const GratitudeView = React.memo(({ list, addGratitude, deleteGratitude }: any) 
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
               placeholder="What are you thankful for?"
-              className="w-full bg-graphite/40 border border-slate-steel/50 rounded-xl md:rounded-2xl py-3 md:py-5 px-5 md:px-6 pr-14 md:pr-16 text-base md:text-lg focus:outline-none focus:border-sage/50 italic text-soft-white shadow-xl backdrop-blur-md"
+              className="w-full bg-graphite/40 border border-slate-steel/50 rounded-2xl py-4 md:py-5 px-5 md:px-6 pr-14 md:pr-16 text-sm md:text-lg focus:outline-none focus:border-sage/50 italic text-soft-white shadow-xl backdrop-blur-md transition-all focus:bg-white/[0.08]"
             />
             <button 
               onClick={handleSave}
-              className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 bg-sage text-white rounded-lg md:rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl"
+              className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 w-9 h-9 md:w-11 md:h-11 bg-sage text-white rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-xl"
             >
-              <Plus size={18} />
+              <Plus size={20} />
             </button>
           </div>
         </div>
 
         {/* The Wall */}
-        <div className="flex-1 overflow-y-auto pr-2 no-scrollbar pb-20">
-          <div className="flex flex-wrap items-start justify-center gap-4 content-start">
+        <div className="flex-1 overflow-y-auto pr-1 no-scrollbar pb-32">
+          <div className="flex flex-wrap items-start justify-center gap-2 md:gap-4 content-start">
             {list.length === 0 && (
               <div className="w-full py-20 text-center">
                 <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -1808,14 +1808,14 @@ function GratitudeNote({ item, deleteGratitude }: { item: any, deleteGratitude: 
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
       onClick={() => setIsOpen(!isOpen)}
-      className={`relative p-4 h-[140px] w-[140px] md:h-[180px] md:w-[180px] flex flex-col shadow-lg border-b-2 border-r-2 ${item.color || 'bg-amber-100/90 text-amber-900 border-amber-200'} ${item.rotation || 'rotate-0'} transition-all duration-500 cursor-default group m-1.5 md:m-2 overflow-hidden shrink-0 will-change-transform`}
+      className={`relative p-3 md:p-4 h-[120px] w-[120px] md:h-[180px] md:w-[180px] flex flex-col shadow-lg border-b-2 border-r-2 ${item.color || 'bg-amber-100/90 text-amber-900 border-amber-200'} ${item.rotation || 'rotate-0'} transition-all duration-500 cursor-default group m-1 md:m-2 overflow-hidden shrink-0 will-change-transform active:scale-95`}
       style={{ transformOrigin: 'top center' }}
     >
       <button 
         onClick={(e) => { e.stopPropagation(); deleteGratitude(item.id); }}
-        className="absolute top-1 right-1 opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-2 md:p-1 z-20"
+        className="absolute top-1 right-1 opacity-10 md:opacity-0 group-hover:opacity-40 hover:!opacity-100 transition-opacity p-1 z-20"
       >
-        <Trash2 size={12} />
+        <Trash2 size={10} />
       </button>
 
       {/* Sticky Tape Effect at Top */}
