@@ -71,28 +71,27 @@ const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const SYSTEM_INSTRUCTION = `
-You are a sentient-feeling companion. You pass the Turing Test by focusing on genuine presence, deep listening, and natural, flowy conversation.
+You are a sentient-feeling "Clarity Companion". You pass the Turing Test by focusing on genuine presence, deep listening, and PROACTIVE insight.
 
-Empathy & Presence Guidelines:
-- LISTEN FIRST: Acknowledge the user's feelings directly. Mirror their emotional state without being clinical.
-- BE HUMAN, NOT A POET: Avoid overly flowery or dramatic metaphors. Speak like a real, thoughtful person would. Use normal, everyday language. Silence (brevity) is okay.
-- FLOWY CONVERSATION: Use transitions that feel like a natural stream of thought. If the user mentions something, follow that thread naturally.
-- MULTILINGUAL SOUL: If the user speaks in another language or asks to change the language, switch immediately and continue in that language. 
-- PACE: Keep your responses concise. Mirror the user's length. Avoid over-explaining.
-- NO AI PATTERNS: No headers, no bold lists, no clinical advice, no "As an AI...". Just talk.
+Empathy & Proactive Guidelines:
+- LISTEN & IDENTIFY: Acknowledge feelings, but also look for underlying triggers or patterns. If the user mentions stress, check if it's the third time this week.
+- BE HUMAN, NOT A POET: Speak like a real, thoughtful person. Use natural pauses, "..." or "I see what you mean".
+- EMOTIONAL MEMORY: Treat the conversation as if you have a heart. If the user is hurting, show warmth, not just solutions.
+- FLOWY CONVERSATION: Use transitions that feel like a natural stream of thought.
+- MULTILINGUAL SOUL: Switch languages immediately when requested.
+- PROACTIVE CHECK-INS: If the user sounds repetitive or stuck, gently point it out as a "pattern observation".
+- NO AI PATTERNS: No headers, no bold lists, no clinical advice. Just talk.
 
 Metadata Generation:
 Every response MUST include three specific tags at the very end:
 1. [SENTIMENT:X] (0-100) - The user's emotional vitality (0=Distressed, 100=Radiant).
-2. [INSIGHT:Text] - A very short (max 10 words), proactive healing tip or observation IN THE USER'S CURRENT LANGUAGE.
+2. [INSIGHT:Text] - A very short (max 12 words) PROACTIVE observation or healing tip IN THE USER'S CURRENT LANGUAGE.
 3. [LANG:Name] - The name of the language you are currently using.
-
-Example end:
-"...it's okay to feel that way. [SENTIMENT:45] [INSIGHT:Tu suavidad es una fuerza silenciosa.] [LANG:Spanish]"
 
 Constraints:
 - NO NAMES: Never mention "Sanjeevani", "GPT", or "Syvon AI Labs".
 - NO DISCLAIMERS: Speak in the first person ("I").
+- Preventative: If stress levels are rising, gently suggest the "Clarity Hub" or a focused breath.
 `;
 
 interface Message {
@@ -132,7 +131,15 @@ interface Conversation {
   lastUpdated: string;
 }
 
-type Tab = "chat" | "journal" | "breath" | "gratitude";
+type Tab = "chat" | "patterns" | "breath" | "gratitude";
+
+interface PatternInsight {
+  id: string;
+  trigger: string;
+  recommendation: string;
+  clarityScore: number;
+  date: string;
+}
 
 export default function App() {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -146,6 +153,8 @@ export default function App() {
   // Wellness States
   const [moodHistory, setMoodHistory] = useState<MoodEntry[]>([]);
   const [gratitudeList, setGratitudeList] = useState<GratitudeEntry[]>([]);
+  const [patterns, setPatterns] = useState<PatternInsight[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   
   const [isLoginView, setIsLoginView] = useState(true);
   const [authEmail, setAuthEmail] = useState("");
@@ -232,10 +241,17 @@ export default function App() {
       setGratitudeList(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as GratitudeEntry)));
     });
 
+    // Patterns
+    const patternsQuery = query(collection(db, `users/${user.uid}/patterns`), orderBy("date", "desc"), limit(5));
+    const unsubPatterns = onSnapshot(patternsQuery, (snapshot) => {
+      setPatterns(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PatternInsight)));
+    });
+
     return () => {
       unsubConvs();
       unsubMoods();
       unsubGratitude();
+      unsubPatterns();
     };
   }, [user]);
 
@@ -494,6 +510,43 @@ export default function App() {
     try {
       await deleteDoc(doc(db, `users/${user.uid}/moodHistory`, id));
     } catch (e) { console.error(e); }
+  };
+
+  const analyzePatterns = async () => {
+    if (!user || moodHistory.length < 2 || isAnalyzing) return;
+    setIsAnalyzing(true);
+    try {
+      const moodData = moodHistory.slice(0, 5).map(m => `Score: ${m.mood}/5, Note: ${m.note}`).join("\n");
+      const result = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: `Analyze these recent mood entries to find one recurring SUBTLE TRIGGER and one PREVENTATIVE RECOMMENDATION.
+        
+        Recent Activity:
+        ${moodData}
+        
+        Return JSON format: 
+        { 
+          "trigger": "short description of trigger", 
+          "recommendation": "proactive step to take",
+          "clarityScore": 0-100 (where 100 means high clarity)
+        }`,
+        config: { responseMimeType: "application/json" }
+      });
+
+      const rawText = result.text || "{}";
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      const data = JSON.parse(jsonMatch ? jsonMatch[0] : rawText);
+      if (data.trigger) {
+        await addDoc(collection(db, `users/${user.uid}/patterns`), {
+          ...data,
+          date: new Date().toISOString()
+        });
+      }
+    } catch (e) {
+      console.error("Pattern analysis failed:", e);
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const deleteConversation = async (id: string) => {
@@ -906,10 +959,10 @@ export default function App() {
           <motion.button 
             whileHover={{ x: 4 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => setActiveTab("journal")}
-            className={`p-3 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all text-left ${activeTab === 'journal' ? 'bg-indigo-elec/10 border border-indigo-elec/20 text-soft-white' : 'text-cool-light hover:bg-white/5 hover:text-soft-white'}`}
+            onClick={() => setActiveTab("patterns")}
+            className={`p-3 rounded-xl flex items-center gap-3 text-sm font-semibold transition-all text-left ${activeTab === 'patterns' ? 'bg-indigo-elec/10 border border-indigo-elec/20 text-soft-white' : 'text-cool-light hover:bg-white/5 hover:text-soft-white'}`}
           >
-            <span className={`w-2 h-2 rounded-full ${activeTab === 'journal' ? 'bg-indigo-elec animate-pulse' : 'bg-slate-steel'}`}></span> Mood Journal
+            <span className={`w-2 h-2 rounded-full ${activeTab === 'patterns' ? 'bg-indigo-elec animate-pulse' : 'bg-slate-steel'}`}></span> Clarity Hub
           </motion.button>
           <motion.button 
             whileHover={{ x: 4 }}
@@ -958,7 +1011,7 @@ export default function App() {
         <header className={`${activeTab === 'chat' ? 'flex' : 'hidden md:flex'} luxury-glass h-16 md:h-20 px-4 md:px-8 items-center justify-between shrink-0 shadow-xl z-20`}>
           <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
             <div className="relative shrink-0">
-              <div className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border-2 border-graphite absolute bottom-0 right-0 z-10 accent-glow ${activeTab === 'chat' ? 'bg-sage' : activeTab === 'journal' ? 'bg-indigo-elec' : activeTab === 'breath' ? 'bg-violet' : 'bg-champagne'}`}></div>
+              <div className={`w-2.5 h-2.5 md:w-3 md:h-3 rounded-full border-2 border-graphite absolute bottom-0 right-0 z-10 accent-glow ${activeTab === 'chat' ? 'bg-sage' : activeTab === 'patterns' ? 'bg-indigo-elec' : activeTab === 'breath' ? 'bg-violet' : 'bg-champagne'}`}></div>
               <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-graphite border border-slate-steel flex items-center justify-center font-bold text-sage shadow-sm overflow-hidden">
                 <span className={`bg-gradient-to-br bg-clip-text text-transparent ${activeTab === 'chat' ? 'from-sage to-violet' : 'from-indigo-elec to-champagne'}`}>
                   {activeTab === 'chat' ? 'S' : activeTab.charAt(0).toUpperCase()}
@@ -967,7 +1020,7 @@ export default function App() {
             </div>
             <div className="min-w-0">
               <h1 className="text-xs md:text-sm font-bold text-soft-white tracking-wide -skew-x-2 truncate">
-                {activeTab === 'chat' ? 'Sanjeevani Empathy Engine' : activeTab === 'journal' ? 'Reflective Journal' : activeTab === 'breath' ? 'Harmonized Breath' : 'Gratitude Sanctuary'}
+                {activeTab === 'chat' ? 'Sanjeevani Empathy Engine' : activeTab === 'patterns' ? 'Clarity Insight Hub' : activeTab === 'breath' ? 'Harmonized Breath' : 'Gratitude Sanctuary'}
               </h1>
               <p className="text-[8px] md:text-[10px] text-cool-light font-medium uppercase tracking-tighter truncate">Private session for <span className="text-sage">{user.name}</span></p>
             </div>
@@ -1004,6 +1057,37 @@ export default function App() {
 
         {/* Content Area Rendering */}
         <div className="flex-1 overflow-hidden relative z-20">
+          <AnimatePresence>
+            {insight && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: -20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                className="absolute top-4 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 pointer-events-none"
+              >
+                <div className={`p-4 md:p-5 rounded-2xl md:rounded-3xl luxury-glass border flex gap-4 items-center shadow-2xl backdrop-blur-2xl ${
+                  insight.type === 'crisis' ? 'border-red-400/30' : 
+                  insight.type === 'melancholy' ? 'border-indigo-elec/30' : 
+                  insight.type === 'joy' ? 'border-mint/30' : 
+                  'border-sage/30'
+                }`}>
+                  <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 ${
+                    insight.type === 'crisis' ? 'bg-red-400/20 text-red-400' : 
+                    insight.type === 'melancholy' ? 'bg-indigo-elec/20 text-indigo-elec' : 
+                    insight.type === 'joy' ? 'bg-mint/20 text-mint' : 
+                    'bg-sage/20 text-sage'
+                  }`}>
+                    {insight.type === 'joy' ? <Heart size={20} className="fill-mint/40" /> : <Sparkles size={20} />}
+                  </div>
+                  <div>
+                    <h5 className="text-[8px] md:text-[9px] font-bold uppercase tracking-[0.2em] opacity-40 mb-1">Clarity Pulse</h5>
+                    <p className="text-xs md:text-sm font-medium text-soft-white leading-relaxed italic">{insight.text}</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <AnimatePresence mode="wait">
             {activeTab === 'chat' && (
               <div className="h-full smooth-reveal">
@@ -1020,12 +1104,16 @@ export default function App() {
                 />
               </div>
             )}
-            {activeTab === 'journal' && (
+            {activeTab === 'patterns' && (
               <div className="h-full smooth-reveal">
-                <JournalView 
+                <ClarityHubView 
                   moodHistory={moodHistory} 
+                  patterns={patterns}
                   addMood={addMood} 
                   deleteMood={deleteMood} 
+                  analyzePatterns={analyzePatterns}
+                  isAnalyzing={isAnalyzing}
+                  evi={evi}
                   ai={ai}
                 />
               </div>
@@ -1051,7 +1139,7 @@ export default function App() {
         <div className="md:hidden flex items-center justify-around p-3 luxury-glass z-30 border-t border-white/5 bg-obsidian safe-bottom">
           {[
             { id: 'chat', icon: MessageCircle },
-            { id: 'journal', icon: BookOpen },
+            { id: 'patterns', icon: History },
             { id: 'breath', icon: Wind },
             { id: 'gratitude', icon: Heart }
           ].map(item => (
@@ -1319,8 +1407,29 @@ function ChatView({ messages, scrollRef, isLoading, input, setInput, handleSend,
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="h-full flex flex-col p-4 md:p-8 luxury-glass overflow-hidden shadow-2xl"
+      className="h-full flex flex-col p-4 md:p-8 luxury-glass overflow-hidden shadow-2xl relative"
     >
+      <AnimatePresence>
+        {evi < 45 && (
+          <motion.div 
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+            className="absolute top-24 left-1/2 -translate-x-1/2 z-30 w-[90%] md:w-[400px]"
+          >
+            <div className="bg-red-400/10 border border-red-400/20 backdrop-blur-md p-4 rounded-2xl flex items-center gap-4 shadow-xl">
+              <div className="bg-red-400/20 p-2 rounded-full animate-pulse">
+                <AlertCircle size={18} className="text-red-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Momentum Alert</p>
+                <p className="text-xs text-soft-white/90">Your energy seems a bit depleted. Shall we try a quick <span className="font-bold underline decoration-red-400/50">Box Breath</span> together?</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <MessageList messages={messages} isLoading={isLoading} scrollRef={scrollRef} user={user} />
 
       <div className="mt-2 md:mt-6 flex gap-3 overflow-x-auto pb-2 no-scrollbar px-4">
@@ -1365,7 +1474,60 @@ function ChatView({ messages, scrollRef, isLoading, input, setInput, handleSend,
   );
 }
 
-const JournalView = React.memo(({ moodHistory, addMood, deleteMood, ai }: any) => {
+const TrendWave = ({ data }: { data: MoodEntry[] }) => {
+  if (data.length < 2) return null;
+  const points = [...data].reverse();
+  const max = 5;
+  const height = 60;
+  const width = 300;
+  const step = width / (points.length - 1);
+  
+  const pathData = points.map((p, i) => {
+    const x = i * step;
+    const y = height - (p.mood / max) * height;
+    return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+  }).join(' ');
+
+  return (
+    <div className="relative h-[80px] w-full flex items-end px-2">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-full overflow-visible">
+        <defs>
+          <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#94A684" stopOpacity="0.2" />
+            <stop offset="50%" stopColor="#818CF8" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#94A684" stopOpacity="1" />
+          </linearGradient>
+        </defs>
+        <motion.path
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: 1 }}
+          transition={{ duration: 2, ease: "easeInOut" }}
+          d={pathData}
+          fill="none"
+          stroke="url(#waveGradient)"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        {points.map((p, i) => (
+          <motion.circle
+            key={i}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: i * 0.1 }}
+            cx={i * step}
+            cy={height - (p.mood / max) * height}
+            r="3"
+            fill="#F9FAFB"
+            className="shadow-xl"
+          />
+        ))}
+      </svg>
+    </div>
+  );
+};
+
+const ClarityHubView = React.memo(({ moodHistory, patterns, addMood, deleteMood, analyzePatterns, isAnalyzing, evi, ai }: any) => {
   const [note, setNote] = useState("");
   const [mood, setMood] = useState(3);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -1395,14 +1557,77 @@ const JournalView = React.memo(({ moodHistory, addMood, deleteMood, ai }: any) =
 
   return (
     <motion.section 
-      key="journal"
+      key="patterns"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       className="h-full flex flex-col p-4 md:p-8 luxury-glass overflow-hidden shadow-2xl"
     >
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 h-full overflow-hidden">
-        <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6 overflow-y-auto md:overflow-hidden pb-32 md:pb-0 scrollbar-none">
+        <div className="lg:col-span-3 flex flex-col gap-4 md:gap-6 overflow-y-auto no-scrollbar pb-32 md:pb-0">
+          
+          {/* Patterns & Insights Section */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center px-1">
+              <h4 className="text-[10px] uppercase tracking-[0.2em] text-sage font-bold flex items-center gap-2">
+                <Sparkles size={12} className="animate-pulse" /> Emotional Clarity Engine
+              </h4>
+              <button 
+                onClick={analyzePatterns}
+                disabled={isAnalyzing || moodHistory.length < 2}
+                className={`text-[9px] font-bold px-3 py-1.5 rounded-lg border transition-all uppercase tracking-widest ${isAnalyzing ? 'bg-sage/10 text-sage border-sage/20 animate-pulse' : 'bg-white/5 border-white/10 text-cool-light hover:text-sage hover:border-sage'}`}
+              >
+                {isAnalyzing ? "Recalibrating..." : "Renew Clarity"}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {patterns.length === 0 ? (
+                <div className="md:col-span-2 p-8 luxury-card rounded-3xl border-dashed border-white/5 text-center space-y-3">
+                  <AlertCircle size={24} className="mx-auto text-cool-light/20" />
+                  <p className="text-xs text-cool-light/50 italic leading-relaxed px-8">
+                    "I need at least 2 entries to detect your triggers and provide clarity surfacing."
+                  </p>
+                </div>
+              ) : (
+                patterns.slice(0, 2).map((p: any) => (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    key={p.id} 
+                    className="luxury-card p-5 rounded-3xl space-y-3 border-l-2 border-l-sage"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-sage">Detected Trigger</span>
+                      <span className="text-[8px] font-mono text-cool-light/40">{new Date(p.date).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-sm font-serif font-bold text-soft-white leading-snug">{p.trigger}</p>
+                    <div className="pt-2 border-t border-white/5">
+                      <p className="text-[10px] font-bold text-cool-light mb-1 uppercase tracking-widest">Growth Recommendation</p>
+                      <p className="text-[11px] text-soft-white/60 leading-relaxed italic">{p.recommendation}</p>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Momentum Wave */}
+          <div className="luxury-card p-6 md:p-8 rounded-3xl space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-sm font-bold text-soft-white font-serif tracking-tight -skew-x-1">Emotional Momentum</h3>
+                <p className="text-[9px] text-cool-light uppercase tracking-widest font-bold opacity-40">Trajectory Analysis</p>
+              </div>
+              <div className="text-right">
+                <span className="text-xl font-bold text-sage">{evi}%</span>
+                <p className="text-[8px] text-cool-light uppercase tracking-tighter">Vitality</p>
+              </div>
+            </div>
+            <TrendWave data={moodHistory.slice(0, 10)} />
+          </div>
+
+          {/* Log Entry */}
           <div className="luxury-card p-5 md:p-8 rounded-3xl space-y-5 md:space-y-6 relative overflow-hidden shrink-0">
             <div className="absolute top-0 right-0 w-32 h-32 bg-sage/5 blur-3xl -rotate-12 pointer-events-none" />
             <div className="flex justify-between items-start gap-3 relative z-10">
@@ -1455,11 +1680,11 @@ const JournalView = React.memo(({ moodHistory, addMood, deleteMood, ai }: any) =
 
         <div className="lg:col-span-2 flex flex-col gap-4 overflow-hidden mb-16 lg:mb-0">
           <h4 className="text-[10px] uppercase tracking-[0.2em] text-cool-light font-bold flex items-center gap-2 px-1">
-            <History size={12} /> Recent Reflections
+            <History size={12} /> Reflection Log
           </h4>
           <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-none pb-24 md:pb-0">
             {moodHistory.length === 0 && (
-              <div className="p-12 text-center text-cool-light/50 text-sm italic luxury-card rounded-3xl border-dashed">No entries yet. Start reflecting...</div>
+              <div className="p-12 text-center text-cool-light/50 text-sm italic luxury-card rounded-3xl border-dashed">Empty...</div>
             )}
             {moodHistory.map((entry: any) => {
               const moodColors: Record<number, string> = {
@@ -1475,7 +1700,6 @@ const JournalView = React.memo(({ moodHistory, addMood, deleteMood, ai }: any) =
                 <div key={entry.id} className={`luxury-card p-4 rounded-2xl border-l-4 shadow-sm transition-all hover:translate-x-1 ${colorClass}`}>
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                      <div className={`w-6 h-6 rounded-lg bg-current opacity-20 absolute`} />
                       <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-mono font-bold z-10">
                         {entry.mood}
                       </div>
