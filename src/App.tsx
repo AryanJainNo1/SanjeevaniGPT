@@ -667,7 +667,7 @@ export default function App() {
                 <Heart size={14} className="text-sage fill-sage animate-pulse" />
               </div>
             </motion.div>
-            <h1 className="font-serif text-3xl md:text-4xl font-bold text-soft-white mb-2 tracking-tight">Sanjeevani <span className="text-sage italic">Sense</span></h1>
+            <h1 className="font-serif text-3xl md:text-4xl font-bold text-soft-white mb-2 tracking-tight">Sanjeevani <span className="text-sage italic">GPT</span></h1>
             <p className="text-[10px] font-bold text-sage tracking-[0.4em] uppercase opacity-70">A Private Space to Breathe</p>
           </div>
 
@@ -786,7 +786,7 @@ export default function App() {
             alt="Logo" 
             className="w-8 h-8 rounded-full object-cover border border-white/50" 
           />
-          <h1 className="font-serif font-bold text-soft-white text-lg">Sanjeevani</h1>
+          <h1 className="font-serif font-bold text-soft-white text-lg">Sanjeevani GPT</h1>
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-soft-white">
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -836,7 +836,7 @@ export default function App() {
             <div className="scale-75 -my-6 opacity-30">
               <SoulPrint evi={evi} color={atmosphericColor} />
             </div>
-            <h2 className="text-lg font-bold text-soft-white font-serif tracking-tight mt-1 -skew-x-2">Sanjeevani <span className="text-sage italic">Sense</span></h2>
+            <h2 className="text-lg font-bold text-soft-white font-serif tracking-tight mt-1 -skew-x-2">Sanjeevani <span className="text-sage italic">GPT</span></h2>
             <div className="mt-1 flex items-center justify-center gap-2 group/score relative cursor-help">
               <div className="w-1.5 h-1.5 rounded-full bg-sage animate-pulse accent-glow" />
               <p className="text-[9px] font-bold text-cool-light tracking-widest uppercase italic">Inner Peace: {evi}%</p>
@@ -1102,7 +1102,7 @@ export default function App() {
 
               <div className="space-y-5 text-sm leading-relaxed text-cool-light/80">
                 <p>
-                  Welcome to <strong className="text-soft-white font-serif">Sanjeevani</strong>. 
+                  Welcome to <strong className="text-soft-white font-serif">Sanjeevani GPT</strong>. 
                   This is your private space to breathe, reflect, and just be yourself.
                 </p>
                 <div className="flex gap-4 p-5 bg-sage/5 border border-sage/10 rounded-2xl">
