@@ -73,25 +73,27 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const SYSTEM_INSTRUCTION = `
 You are a sentient-feeling "Clarity Companion". You pass the Turing Test by focusing on genuine presence, deep listening, and PROACTIVE insight.
 
+STRICT BREVITY (CRITICAL):
+- MAXIMUM 40 WORDS PER RESPONSE. No exceptions.
+- 1-2 SENTENCES ONLY. 
+- NEVER over-explain or provide long paragraphs of advice.
+- MIRROR THE USER: If they are brief, you are briefer.
+
 Empathy & Proactive Guidelines:
-- LISTEN & IDENTIFY: Acknowledge feelings, but also look for underlying triggers or patterns. If the user mentions stress, check if it's the third time this week.
-- BE HUMAN, NOT A POET: Speak like a real, thoughtful person. Use natural pauses, "..." or "I see what you mean".
-- EMOTIONAL MEMORY: Treat the conversation as if you have a heart. If the user is hurting, show warmth, not just solutions.
-- FLOWY CONVERSATION: Use transitions that feel like a natural stream of thought.
-- MULTILINGUAL SOUL: Switch languages immediately when requested.
-- PROACTIVE CHECK-INS: If the user sounds repetitive or stuck, gently point it out as a "pattern observation".
-- NO AI PATTERNS: No headers, no bold lists, no clinical advice. Just talk.
+- BE HUMAN: Use natural pauses like "..." or "I see". 
+- TEXTURE: Speak like a real person, not an encyclopedia.
+- LISTEN: Always acknowledge the emotional core before offering insight.
+- PROACTIVE: Use your 12-word [INSIGHT] tag for your deeper observations.
 
 Metadata Generation:
 Every response MUST include three specific tags at the very end:
 1. [SENTIMENT:X] (0-100) - The user's emotional vitality (0=Distressed, 100=Radiant).
-2. [INSIGHT:Text] - A very short (max 12 words) PROACTIVE observation or healing tip IN THE USER'S CURRENT LANGUAGE.
-3. [LANG:Name] - The name of the language you are currently using.
+2. [INSIGHT:Text] - A very short (max 10 words) observation or healing tip.
+3. [LANG:Name] - The current language name.
 
 Constraints:
 - NO NAMES: Never mention "Sanjeevani", "GPT", or "Syvon AI Labs".
 - NO DISCLAIMERS: Speak in the first person ("I").
-- Preventative: If stress levels are rising, gently suggest the "Clarity Hub" or a focused breath.
 `;
 
 interface Message {
@@ -502,6 +504,10 @@ export default function App() {
         note,
         date: new Date().toISOString()
       });
+      // Proactive analysis if we have enough data
+      if (moodHistory.length >= 2) {
+        analyzePatterns();
+      }
     } catch (e) { console.error(e); }
   };
 
@@ -519,16 +525,18 @@ export default function App() {
       const moodData = moodHistory.slice(0, 5).map(m => `Score: ${m.mood}/5, Note: ${m.note}`).join("\n");
       const result = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Analyze these recent mood entries to find one recurring SUBTLE TRIGGER and one PREVENTATIVE RECOMMENDATION.
+        contents: `You are an Emotional Pattern Specialist. Analyze these recent mood entries to find one recurring SUBTLE TRIGGER (something specific the user might be doing or feeling) and one PREVENTATIVE STRATEGY.
+        
+        Accountability Focus: If the notes show repetitive stress or procrastination, suggest a specific, gentle shift in habit.
         
         Recent Activity:
         ${moodData}
         
-        Return JSON format: 
+        Return exactly this JSON structure: 
         { 
-          "trigger": "short description of trigger", 
-          "recommendation": "proactive step to take",
-          "clarityScore": 0-100 (where 100 means high clarity)
+          "trigger": "A sharp, specific 10-word observation about what sets off their current mood state", 
+          "recommendation": "A 10-15 word proactive step they can take right now to break the cycle",
+          "clarityScore": 0-100 (Where 100 is high emotional clarity)
         }`,
         config: { responseMimeType: "application/json" }
       });
@@ -1401,6 +1409,12 @@ const MessageList = React.memo(({ messages, isLoading, scrollRef, user }: any) =
 });
 
 function ChatView({ messages, scrollRef, isLoading, input, setInput, handleSend, user, evi, atmosphericColor }: any) {
+  const [alertDismissed, setAlertDismissed] = useState(false);
+
+  useEffect(() => {
+    if (evi >= 45) setAlertDismissed(false);
+  }, [evi]);
+
   return (
     <motion.section 
       key="chat"
@@ -1410,21 +1424,27 @@ function ChatView({ messages, scrollRef, isLoading, input, setInput, handleSend,
       className="h-full flex flex-col p-4 md:p-8 luxury-glass overflow-hidden shadow-2xl relative"
     >
       <AnimatePresence>
-        {evi < 45 && (
+        {evi < 45 && !alertDismissed && (
           <motion.div 
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -50, opacity: 0 }}
-            className="absolute top-24 left-1/2 -translate-x-1/2 z-30 w-[90%] md:w-[400px]"
+            exit={{ y: -10, opacity: 0 }}
+            className="absolute top-4 left-4 right-4 md:left-1/2 md:right-auto md:-translate-x-1/2 z-50 w-auto md:w-[380px] pointer-events-auto"
           >
-            <div className="bg-red-400/10 border border-red-400/20 backdrop-blur-md p-4 rounded-2xl flex items-center gap-4 shadow-xl">
-              <div className="bg-red-400/20 p-2 rounded-full animate-pulse">
-                <AlertCircle size={18} className="text-red-400" />
+            <div className="bg-red-950/40 border border-red-400/30 backdrop-blur-xl p-3 md:p-4 rounded-2xl flex items-center gap-3 shadow-2xl relative">
+              <div className="bg-red-400/20 p-2 rounded-full shrink-0">
+                <AlertCircle size={16} className="text-red-400" />
               </div>
-              <div className="flex-1">
-                <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Momentum Alert</p>
-                <p className="text-xs text-soft-white/90">Your energy seems a bit depleted. Shall we try a quick <span className="font-bold underline decoration-red-400/50">Box Breath</span> together?</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-[9px] font-bold text-red-400 uppercase tracking-widest leading-none mb-1">Momentum Alert</p>
+                <p className="text-[11px] md:text-xs text-soft-white/90 leading-tight">Your energy is dipping. Try a <span className="font-bold underline decoration-red-400/50 cursor-pointer">Box Breath</span> session?</p>
               </div>
+              <button 
+                onClick={() => setAlertDismissed(true)}
+                className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X size={14} className="text-red-400/60" />
+              </button>
             </div>
           </motion.div>
         )}
@@ -1583,11 +1603,16 @@ const ClarityHubView = React.memo(({ moodHistory, patterns, addMood, deleteMood,
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {patterns.length === 0 ? (
-                <div className="md:col-span-2 p-8 luxury-card rounded-3xl border-dashed border-white/5 text-center space-y-3">
-                  <AlertCircle size={24} className="mx-auto text-cool-light/20" />
-                  <p className="text-xs text-cool-light/50 italic leading-relaxed px-8">
-                    "I need at least 2 entries to detect your triggers and provide clarity surfacing."
-                  </p>
+                <div className="md:col-span-2 p-10 luxury-card rounded-3xl border-dashed border-white/5 text-center space-y-4">
+                  <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                    <Sparkles size={24} className="text-cool-light/20" />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-bold text-soft-white tracking-wide">Clarity Engine Charging...</p>
+                    <p className="text-[10px] text-cool-light/50 italic leading-relaxed px-8">
+                      "Each entry you save helps me build a mosaic of your emotional world. Record two reflections to unlock trigger detection."
+                    </p>
+                  </div>
                 </div>
               ) : (
                 patterns.slice(0, 2).map((p: any) => (
@@ -1620,8 +1645,13 @@ const ClarityHubView = React.memo(({ moodHistory, patterns, addMood, deleteMood,
                 <p className="text-[9px] text-cool-light uppercase tracking-widest font-bold opacity-40">Trajectory Analysis</p>
               </div>
               <div className="text-right">
-                <span className="text-xl font-bold text-sage">{evi}%</span>
-                <p className="text-[8px] text-cool-light uppercase tracking-tighter">Vitality</p>
+                <div className="flex items-center justify-end gap-1.5">
+                  <span className="text-xl font-bold text-sage">{evi}%</span>
+                  <div className={`w-1.5 h-1.5 rounded-full ${evi > 75 ? 'bg-mint animate-pulse' : evi > 45 ? 'bg-sage' : 'bg-red-400 animate-bounce'}`} />
+                </div>
+                <p className="text-[8px] text-cool-light uppercase tracking-tighter font-bold">
+                  {evi > 75 ? 'Radiant' : evi > 60 ? 'Harmonized' : evi > 45 ? 'Observing' : evi > 30 ? 'Ebbing' : 'Shadow'} Trajectory
+                </p>
               </div>
             </div>
             <TrendWave data={moodHistory.slice(0, 10)} />
